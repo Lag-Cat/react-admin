@@ -1,0 +1,90 @@
+.site-layout {
+  .site-header {
+    background: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0px;
+    &-content {
+      position: absolute;
+      // top: 50%;
+      // transform: translateY(-50%);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      width: 100%;
+      padding: 10px;
+      &-icon {
+        font-size: 20px;
+        line-height: 36px;
+      }
+
+      &-breadcrumb {
+        display: inline-block;
+        line-height: 36px;
+      }
+    }
+  }
+
+  .site-sider-logo {
+    height: 64px;
+  }
+
+  .site-content {
+    background: white;
+    margin: 5px;
+    overflow: auto;
+  }
+  .site-footer {
+    height: 35px;
+    padding: 0px;
+    text-align: center;
+    position: relative;
+    &-btn {
+      font-size: 20px;
+      position: absolute;
+      right: 10px;
+      top: 1px;
+      cursor: pointer;
+    }
+  }
+}
+.site-drawer {
+  &-item {
+    &-extra {
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: row;
+    }
+    &-btn {
+      background: inherit;
+      display: inline-block;
+      transition: background-color 1s;
+      padding: 0 1px;
+      line-height: 16px;
+      &:hover {
+        background: #000;
+      }
+      & > :first-child {
+        background: #fff;
+      }
+    }
+
+    &-close {
+      animation: drawerItemClose 1s;
+      animation-fill-mode: forwards;
+    }
+  }
+}
+
+@keyframes drawerItemClose {
+  0% {
+    transform: translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}

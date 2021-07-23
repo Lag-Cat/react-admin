@@ -1,0 +1,12 @@
+.home {
+  &-news {
+    display: flex;
+    flex-wrap: wrap;
+
+    &-item {
+      margin: 10px;
+      flex: 1;
+      max-width: calc(33% - 20px);
+    }
+  }
+}

@@ -1,0 +1,23 @@
+.login {
+  background-image: url("http://www.mee.gov.cn/home/ztbd/rdzl/sskf/kfss/gds/dspgd/202004/W020200401639108186079.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+}
+
+.login .panel-login {
+  display: block;
+  position: absolute;
+  width: 300px;
+  margin: 10px;
+  padding: 30px 20px;
+  border-radius: 8px;
+  right: 10%;
+  top: 30%;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.login .panel-login .fi-button {
+  display: flex;
+  justify-content: space-between;
+}

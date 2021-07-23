@@ -1,0 +1,1 @@
+export const baseUrl="http://10.2.78.52:46082"
