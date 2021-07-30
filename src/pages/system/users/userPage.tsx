@@ -1,6 +1,7 @@
-import { Button, Table } from 'antd'
+import { Button, Row, Table, Form, Checkbox, Input, message, Col, Modal, Space } from 'antd'
 import { useEffect, useState } from 'react'
-import { findAll, findById } from '../../../api/user'
+import ReactDOM from 'react-dom'
+import { findAll, findById, addUser, updateUser, deleteUser } from '../../../api/user'
 interface dataRow {
     key: string,
     id: number,
@@ -13,48 +14,69 @@ interface dataRow {
 }
 declare type dataSource = dataRow[]
 
-const columns: column[] = [
-    {
-        title: 'id',
-        dataIndex: 'id',
-        key: 'id',
-    },
-    {
-        title: '用户名',
-        dataIndex: 'userName',
-        key: 'userName',
-    },
-    {
-        title: '电子邮箱',
-        dataIndex: 'email',
-        key: 'email',
-    },
-    {
-        title: '状态',
-        dataIndex: 'status',
-        key: 'status',
-    },
-    {
-        title: '组id',
-        dataIndex: 'groupId',
-        key: 'groupId',
-    },
-    {
-        title: '创建日期',
-        dataIndex: 'createdAt',
-        key: 'createdAt',
-    },
-    {
-        title: '修改日期',
-        dataIndex: 'updatedAt',
-        key: 'updatedAt',
-    },
-]
 
-
+// const { Column } = Table;
+const { confirm } = Modal;
 const UserPage = () => {
     const [dataSource, setDataSource] = useState<dataSource>();
-
+    const columns: column[] = [
+        {
+            title: 'id',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: '用户名',
+            dataIndex: 'userName',
+            key: 'userName',
+        },
+        {
+            title: '电子邮箱',
+            dataIndex: 'email',
+            key: 'email',
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            key: 'status',
+        },
+        {
+            title: '组id',
+            dataIndex: 'groupId',
+            key: 'groupId',
+        },
+        {
+            title: '创建日期',
+            dataIndex: 'createdat',
+            key: 'createdat',
+        },
+        {
+            title: '修改日期',
+            dataIndex: 'updatedat',
+            key: 'updatedat',
+        },
+        {
+            title: '操作',
+            dataIndex: 'operation',
+            key: 'operation',
+            render: (text: any, record: dataRow) =>
+                <Button
+                    type="link"
+                    onClick={() => {
+                        confirm({
+                            title: "提示",
+                            content: "是否删除？",
+                            onOk() {
+                                deleteUser({ id: record.id }).then(() => {
+                                    getData();
+                                })
+                            }
+                        })
+                    }}>
+                    删除
+                </Button>
+        },
+    ]
     const getData = () => {
         findAll().then(res => {
             const resp = res.map((item, key) => { let r = (item as dataRow); r.key = key.toString(); return r; })
@@ -64,12 +86,159 @@ const UserPage = () => {
 
     useEffect(() => {
         getData();
+        return () => {
+            if (wrap) {
+                ReactDOM.unmountComponentAtNode(wrap);
+            }
+        }
     }, [])
 
     return <div>
-        <div><Button type="primary" onClick={() => getData()}>查询</Button></div>
-        <Table columns={columns} dataSource={dataSource} />
+        <Row>
+            <Col>
+                <Space>
+                    <Button type="primary" onClick={() => getData()}>查询</Button>
+                    <Button type="primary"
+                        onClick={() => UserModal({ visible: true, operation: "add" }).then(() => getData())}
+                    >
+                        新增
+                    </Button>
+                </Space>
+            </Col>
+        </Row>
+        <Table
+            columns={columns}
+            dataSource={dataSource}
+            onRow={
+                record => {
+                    return {
+                        onDoubleClick: event => {
+                            UserModal({
+                                visible: true,
+                                dataSource: record,
+                                operation: "update"
+                            }).then(() => {
+                                message.success("删除成功")
+                                getData();
+                            })
+                        }
+                    }
+                }
+            } >
+        </Table>
     </div>
+}
+
+declare type operation = "add" | "update"
+interface IUserModalProp {
+    visible: boolean,
+    dataSource?: dataRow,
+    operation: operation,
+}
+let wrap: HTMLElement
+const UserModal = (props: IUserModalProp): Promise<void> => {
+    return new Promise((resolve__, reject__) => {
+        if (!wrap) {
+            wrap = document.createElement("div");
+
+            if (wrap)
+                document.body && document.body.appendChild(wrap);
+        }
+
+        let submitRecord = (data: any): Promise<void> => {
+            if (data.status) data.status = 1;
+            if (!data.status) data.status = 0;
+
+            return new Promise((resolve, reject) => {
+                if (props.operation === "add")
+                    addUser({ ...props.dataSource, ...data }).then(() => {
+                        message.success("保存成功")
+                        resolve()
+                        resolve__();
+                    })
+                if (props.operation === "update")
+                    updateUser({ ...props.dataSource, ...data }).then(() => {
+                        message.success("保存成功")
+                        resolve()
+                        resolve__();
+                    })
+            })
+
+        }
+
+        let Cmodal = () => {
+            let [visible, setVisible] = useState<boolean>(props.visible);
+            let onFinishFailed = () => {
+                message.error("表单中存在填写错误。")
+            }
+            let onFinish = (values: any) => {
+                submitRecord(values).then(() => {
+                    setVisible(false);
+                });
+            }
+            return <Modal
+                visible={visible}
+                title={props.operation === "add" ? "新增" : props.operation === "update" ? "修改" : ""}
+                onOk={() => setVisible(false)}
+                onCancel={() => setVisible(false)}
+                footer={null}
+            >
+                <div style={{ margin: "40px 30px 10px 0px" }}>
+                    <Form
+                        name="basic"
+                        labelCol={{ span: 8 }}
+                        wrapperCol={{ span: 16 }}
+                        initialValues={{ ...props.dataSource }}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                    >
+                        <Form.Item
+                            label="用户名"
+                            name="userName"
+                            rules={[{ required: true, message: '请输入用户名' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            label="电子邮箱"
+                            name="email"
+                        // rules={[{ required: true, message: '请输入用户名' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            label="组id"
+                            name="groupId"
+                        // rules={[{ required: true, message: '请输入用户名' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item name="status" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
+                            <Checkbox>禁用</Checkbox>
+                        </Form.Item>
+
+                        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                            <Row>
+                                <Col span={11}>
+                                    <Button type="primary" htmlType="submit" block>
+                                        保存
+                                    </Button>
+                                </Col>
+                                <Col span={11} offset={2}>
+                                    <Button type="ghost" block onClick={() => setVisible(false)}>
+                                        取消
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Form.Item>
+                    </Form>
+                </div>
+            </Modal>
+        }
+
+        ReactDOM.render(<Cmodal></Cmodal>, wrap);
+    })
 }
 
 export default UserPage;

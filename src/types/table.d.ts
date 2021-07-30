@@ -1,6 +1,6 @@
 declare interface column {
   title: string;
-  dataIndex: string;
+  dataIndex?: string;
   key: string;
-  render?: (data: any) => any | undefined;
+  render?: (data?: any, record?: any) => any | undefined;
 }

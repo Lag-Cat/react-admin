@@ -1,7 +1,7 @@
 // 重写axios配置,重写get/post方法,实现拦截器
 import axios from "axios";
 import { router } from "../router";
-import { Modal } from "antd";
+import { message, Modal } from "antd";
 declare interface IAxiosResponse {
   code: number;
   data: any;
@@ -23,6 +23,12 @@ const instance = axios.create({
   baseURL,
   //   crossDomain: true
 });
+
+interface IResult {
+  code: number;
+  msg: String;
+  data: any;
+}
 
 // instance.defaults.crossDomain = true
 // 请求拦截器
@@ -136,12 +142,13 @@ const post = function (url: string, data: any, params: any) {
     // 使用Promise异步
     instance
       .post(url, data, params)
-      .then((response) => {
+      .then((response: any) => {
         // 处理后端传回的错误信息
-        if (response.status !== 200 && response.data.code < 0) {
-          reject(response.data.msg);
-        } else {
+        if (response.code === 0 || response.code === 200) {
           resolve(response.data);
+        } else {
+          message.error(response.msg, 2);
+          reject(response.data.msg);
         }
       })
       .catch((e) => {

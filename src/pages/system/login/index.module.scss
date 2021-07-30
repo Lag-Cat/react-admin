@@ -1,23 +1,46 @@
 .login {
-  background-image: url("http://www.mee.gov.cn/home/ztbd/rdzl/sskf/kfss/gds/dspgd/202004/W020200401639108186079.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  height: 100vh;
-}
+  .header {
+    height: 50px;
+  }
+  .banner {
+    background-image: url("http://www.mee.gov.cn/home/ztbd/rdzl/sskf/kfss/gds/dspgd/202004/W020200401639108186079.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 500px;
+    width: 100%;
+    position: relative;
+    .panel-login {
+      .title {
+        font-size: 20px;
+        text-align: center;
+        color: #4c9fea;
+      }
+      display: block;
+      position: absolute;
+      width: 300px;
+      margin: 10px;
+      padding: 30px 20px;
+      border-radius: 8px;
+      right: 10%;
+      top: 20%;
+      background: rgba(255, 255, 255, 0.5);
 
-.login .panel-login {
-  display: block;
-  position: absolute;
-  width: 300px;
-  margin: 10px;
-  padding: 30px 20px;
-  border-radius: 8px;
-  right: 10%;
-  top: 30%;
-  background: rgba(255, 255, 255, 0.5);
-}
+      .item-input {
+        margin: 10px 15px;
+        .forgetpsw {
+          text-decoration: underline;
+          text-align: right;
+          cursor: pointer;
+        }
+      }
+    }
+  }
 
-.login .panel-login .fi-button {
-  display: flex;
-  justify-content: space-between;
+  .notice {
+    padding: 0 10px;
+  }
+
+  .notice-card {
+    margin: 10px 15px;
+  }
 }

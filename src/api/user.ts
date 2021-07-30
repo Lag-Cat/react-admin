@@ -1,17 +1,7 @@
 import axios from "../utils/axios";
 import { baseUrl } from "../utils/config";
 
-export const findAll = (): Promise<
-  {
-    id: number;
-    userName: string;
-    email: string;
-    status: string;
-    groupId: string;
-    createdAt: string;
-    updatedAt: string;
-  }[]
-> => {
+export const findAll = (): Promise<userInfo[]> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/findAll`).then(
       (res) => {
@@ -22,21 +12,44 @@ export const findAll = (): Promise<
   });
 };
 
-export const findById = (data: {
-  id: number;
-}): Promise<{
-  id: number;
-  userName: string;
-  email: string;
-  status: string;
-  groupId: string;
-  createdAt: string;
-  updatedAt: string;
-}> => {
+export const findById = (data: userInfoId): Promise<userInfo> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/findById`, data).then(
       (res) => {
         resolve(res);
+      },
+      () => reject()
+    );
+  });
+};
+
+export const addUser = (data: userInfo): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/user/addUser`, data).then(
+      () => {
+        resolve();
+      },
+      () => reject()
+    );
+  });
+};
+
+export const updateUser = (data: userInfo): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/user/updateUser`, data).then(
+      () => {
+        resolve();
+      },
+      () => reject()
+    );
+  });
+};
+
+export const deleteUser = (data: userInfoId): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/user/deleteUser`, data).then(
+      () => {
+        resolve();
       },
       () => reject()
     );

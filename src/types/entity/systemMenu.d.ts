@@ -7,3 +7,7 @@ interface SysMenu {
   createdBy: string;
   createdDate: string;
 }
+
+interface SysMenuId {
+  id: number;
+}

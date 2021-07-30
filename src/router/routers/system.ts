@@ -12,4 +12,10 @@ export default [
     title: "菜单设置",
     component: React.lazy(() => import("../../pages/system/menu/menuPage")),
   },
+  {
+    name: "auth",
+    path: "/auth/search",
+    title: "权限设置",
+    component: React.lazy(() => import("../../pages/system/auth/authPage")),
+  },
 ];
