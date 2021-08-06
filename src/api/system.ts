@@ -24,6 +24,7 @@ export const getSysMenuList = (): Promise<
     parentId: number;
     menuName: string;
     urlTo: string;
+    icon: string;
     isDeleted: string;
     createdBy: string;
     createdDate: string;

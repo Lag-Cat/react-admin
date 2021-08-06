@@ -149,8 +149,6 @@ const cModal = (props: IUserModalProp): Promise<void> => {
         }
 
         let submitRecord = (data: any): Promise<void> => {
-
-            console.log("asd")
             if (data.isDeleted) data.isDeleted = 1;
             if (!data.isDeleted) data.isDeleted = 0;
 

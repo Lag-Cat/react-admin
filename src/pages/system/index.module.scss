@@ -49,6 +49,13 @@
       cursor: pointer;
     }
   }
+
+  .site-siderbar {
+    .siderbar-title {
+      height: 64px;
+      padding: 10px 0;
+    }
+  }
 }
 .site-drawer {
   &-item {

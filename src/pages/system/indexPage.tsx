@@ -1,4 +1,4 @@
-import { Layout, Menu, Breadcrumb, Avatar, Popover, Tabs, Button, Divider, Drawer, Card, Badge } from 'antd'
+import { Layout, Menu, Breadcrumb, Avatar, Popover, Tabs, Button, Divider, Drawer, Card, Badge, Image } from 'antd'
 import {
     MenuUnfoldOutlined,
     MenuFoldOutlined,
@@ -6,7 +6,8 @@ import {
     VideoCameraOutlined,
     UploadOutlined,
     CloseOutlined,
-    AppstoreOutlined
+    AppstoreOutlined,
+    createFromIconfontCN
 } from '@ant-design/icons';
 import layout from './index.module.scss'
 import React, { ReactNode, useEffect, useState, Suspense } from 'react'
@@ -14,7 +15,12 @@ import { useSelector, useDispatch } from 'react-redux'
 import { router } from '../../router'
 import { setNewTabIfAbsent, setActiveKey } from './lib/indexPage'
 import { getSysMenuList } from '../../api/system'
+import logo from '../../assets/img/logo.png'
+import { create } from 'domain';
 
+const IconFont = createFromIconfontCN({
+    scriptUrl: "//at.alicdn.com/t/font_2654806_1cjbj63vr6s.js"
+})
 const { Header, Footer, Sider, Content } = Layout
 const { TabPane } = Tabs;
 interface Notice {
@@ -32,6 +38,7 @@ interface Res {
     isDeleted: string;
     createdBy: string;
     createdDate: string;
+    icon: string;
 }
 
 const IndexPage = () => {
@@ -42,9 +49,9 @@ const IndexPage = () => {
     const [notice, setNotice] = useState<Notice[]>();
     const dispatch = useDispatch();
     const tabItems = useSelector((state: IReduxIndex) => state.router.tabItems)
-    const [MainMenu, setMenu] = useState<ReactNode[]>();
-
-
+    const [MainMenu, setMainMenu] = useState<ReactNode[]>();
+    const [showIconOnly, setShowIconOnly] = useState<boolean>();
+    const [menu, setMenu] = useState<Res[]>([]);
     window.onresize = () => {
         if (window.innerWidth <= 768)
             setIsMobile(true);
@@ -55,53 +62,51 @@ const IndexPage = () => {
     useEffect(() => {
         setNewTabIfAbsent("/home");
         getSysMenuList().then(res => {
-            let getChild = (row: Res, rows: Res[]) => {
-                return rows.filter(item => row.id === item.parentId);
-            }
-
-            let getMenuTree = (rows: Res[], node?: Res) => {
-                let menuList: ReactNode[] = [];
-                rows.forEach(item => {
-                    if (item.id === 0) return;
-                    if (node && node.id !== item.parentId) return;
-
-                    let menuChildren: Res[] = getChild(item, rows)
-                    if (menuChildren.length === 0) {
-                        menuList.push(
-                            <Menu.Item key={item.id} onClick={() => setNewTabIfAbsent(item.urlTo)}>{item.menuName}</Menu.Item>
-                        )
-                    } else {
-                        let _menuList = getMenuTree(rows, item);
-
-                        menuList.push(
-                            <Menu.SubMenu key={item.id} title={item.menuName}>
-                                {_menuList}
-                            </Menu.SubMenu>
-                        );
-                    }
-                })
-
-                console.log(menuList)
-                return menuList;
-            }
-
-            let rootNode = res.find(item => item.id === 0)
-            let menu = getMenuTree(res, rootNode);
-            setMenu(menu);
+            setMenu(res)
         })
-        // let ws = new WebSocket("ws://10.2.78.52:46082/test")
-        // ws.onopen = () => {
-        //     ws.send("hello")
-        // }
-
-        // ws.onmessage = (e) => {
-        //     console.log(e.data);
-        //     // setNotice([...(notice ? notice : []),
-        //     //  ...[{ id: new Date().getTime().toString(), title: e.data, content: e.data, __isClose: false }]])
-        //     notice?.push({ id: new Date().getTime().toString(), title: e.data, content: e.data, __isClose: false })
-        //     setNotice(notice)
-        // }
     }, [])
+
+    useEffect(() => {
+        console.log(menu, "menu")
+        setMenuTree(menu)
+    }, [showIconOnly, menu])
+
+    let setMenuTree = (res: Res[]) => {
+        console.log(res);
+        let getChild = (row: Res, rows: Res[]) => {
+            return rows.filter(item => row.id === item.parentId);
+        }
+
+        let getMenuTree = (rows: Res[], node?: Res) => {
+            let menuList: ReactNode[] = [];
+            rows.forEach(item => {
+                if (item.id === 0) return;
+                if (node && node.id !== item.parentId) return;
+
+                let menuChildren: Res[] = getChild(item, rows)
+                if (menuChildren.length === 0) {
+                    menuList.push(
+                        <Menu.Item icon={<IconFont type={item.icon} />} key={item.id} onClick={() => setNewTabIfAbsent(item.urlTo)}>{showIconOnly && item.menuName}</Menu.Item>
+                    )
+                } else {
+                    let _menuList = getMenuTree(rows, item);
+
+                    menuList.push(
+                        <Menu.SubMenu key={item.id} title={item.menuName}>
+                            {_menuList}
+                        </Menu.SubMenu>
+                    );
+                }
+            })
+
+            console.log(menuList, "asd")
+            return menuList;
+        }
+
+        let rootNode = res.find(item => item.id === 0)
+        let menu = getMenuTree(res, rootNode);
+        setMainMenu(menu);
+    }
 
     let onEdit = (targetKey: string | React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent<Element>, action: "add" | "remove") => {
         console.log(targetKey, action)
@@ -131,26 +136,30 @@ const IndexPage = () => {
             setNotice(notice?.filter(item1 => !item1.__isClose))
         }, 1000 * 1);
     }
-    const SiderMenu = <>
-        <div className={layout["site-sider-logo"]} />
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={[]}>
-            <Menu.Item key="1" icon={<UserOutlined />} onClick={() => setNewTabIfAbsent("/personalSettings")}>
-                nav 1
-            </Menu.Item>
-            <Menu.Item key="2" icon={<VideoCameraOutlined />} onClick={() => setNewTabIfAbsent('/messageRecord')}>
-                nav 2
-            </Menu.Item>
-            <Menu.Item key="3" icon={<UploadOutlined />}>
-                nav 3
-            </Menu.Item>
-        </Menu>
-    </>
 
+    let onMenuToggleClick = () => {
+        if (!sideToggle) {
+            setSideToggle(true)
+            return;
+        }
+        setShowIconOnly(!showIconOnly);
+    }
+
+    let onMenuToggleDoubleClick = () => {
+        setSideToggle(!sideToggle)
+    }
 
     return <>
         <Layout style={{ height: "100%" }} className={layout["site-layout"]} >
-            <Sider style={sideToggle ? {} : { marginLeft: "-200px" }}>
+            <Sider style={sideToggle ? {} : { marginLeft: "-200px" }} className={layout["site-siderbar"]}>
                 {/* {SiderMenu} */}
+                <div className={layout["siderbar-title"]}>
+                    <Image
+                        width={200}
+                        src={logo}
+                        preview={false}
+                    />
+                </div>
                 <Menu theme="dark" mode="inline" defaultSelectedKeys={[]}>
                     {MainMenu ? MainMenu : <></>}
                 </Menu>
@@ -161,8 +170,8 @@ const IndexPage = () => {
                     <div className={layout["site-header-content"]}>
                         {
                             !sideToggle ?
-                                <MenuUnfoldOutlined onClick={() => setSideToggle(true)} className={layout["site-header-content-icon"]} />
-                                : <MenuFoldOutlined onClick={() => setSideToggle(false)} className={layout["site-header-content-icon"]} />
+                                <MenuUnfoldOutlined onClick={onMenuToggleClick} onDoubleClick={onMenuToggleDoubleClick} className={layout["site-header-content-icon"]} />
+                                : <MenuFoldOutlined onClick={onMenuToggleClick} onDoubleClick={onMenuToggleDoubleClick} className={layout["site-header-content-icon"]} />
                         }
                         <Popover placement="bottomRight" content={<>
                             <div><a>设置</a></div>

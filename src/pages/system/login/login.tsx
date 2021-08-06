@@ -51,7 +51,6 @@ const LoginPage = () => {
                                 setAccount(e.target.value);
                             }}
                             onKeyPress={(e) => {
-                                console.log(e);
                                 if (e.key == "Enter")
                                     userLogin();
                             }}
@@ -67,7 +66,7 @@ const LoginPage = () => {
                                 setPassword(e.target.value);
                             }}
                             onKeyPress={(e) => {
-                                if (e.key == "13")
+                                if (e.key == "Enter")
                                     userLogin();
                             }}
                         />

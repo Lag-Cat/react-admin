@@ -1,7 +1,7 @@
 import axios from "../utils/axios";
 import { baseUrl } from "../utils/config";
 
-export const findAll = (): Promise<userInfo[]> => {
+export const findAll = (): Promise<UserInfo[]> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/findAll`).then(
       (res) => {
@@ -12,7 +12,7 @@ export const findAll = (): Promise<userInfo[]> => {
   });
 };
 
-export const findById = (data: userInfoId): Promise<userInfo> => {
+export const findById = (data: UserInfoId): Promise<UserInfo> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/findById`, data).then(
       (res) => {
@@ -23,7 +23,7 @@ export const findById = (data: userInfoId): Promise<userInfo> => {
   });
 };
 
-export const addUser = (data: userInfo): Promise<void> => {
+export const addUser = (data: UserInfo): Promise<void> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/addUser`, data).then(
       () => {
@@ -34,7 +34,7 @@ export const addUser = (data: userInfo): Promise<void> => {
   });
 };
 
-export const updateUser = (data: userInfo): Promise<void> => {
+export const updateUser = (data: UserInfo): Promise<void> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/updateUser`, data).then(
       () => {
@@ -45,7 +45,7 @@ export const updateUser = (data: userInfo): Promise<void> => {
   });
 };
 
-export const deleteUser = (data: userInfoId): Promise<void> => {
+export const deleteUser = (data: UserInfoId): Promise<void> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/deleteUser`, data).then(
       () => {

@@ -1,4 +1,4 @@
-interface userInfo {
+interface UserInfo {
   id: number;
   userName: string;
   email: string;
@@ -8,6 +8,6 @@ interface userInfo {
   updatedAt: string;
 }
 
-interface userInfoId {
+interface UserInfoId {
   id: number;
 }
