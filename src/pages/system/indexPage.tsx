@@ -17,10 +17,12 @@ import { setNewTabIfAbsent, setActiveKey } from './lib/indexPage'
 import { getSysMenuList } from '../../api/system'
 import logo from '../../assets/img/logo.png'
 import { create } from 'domain';
+import './index.scss'
 
 const IconFont = createFromIconfontCN({
-    scriptUrl: "//at.alicdn.com/t/font_2654806_1cjbj63vr6s.js"
+    scriptUrl: "//at.alicdn.com/t/font_2654806_z1m63sil87.js"
 })
+const DEFAULT_ICON = "icon-moren"
 const { Header, Footer, Sider, Content } = Layout
 const { TabPane } = Tabs;
 interface Notice {
@@ -50,8 +52,9 @@ const IndexPage = () => {
     const dispatch = useDispatch();
     const tabItems = useSelector((state: IReduxIndex) => state.router.tabItems)
     const [MainMenu, setMainMenu] = useState<ReactNode[]>();
-    const [showIconOnly, setShowIconOnly] = useState<boolean>();
+    const [showIconOnly, setShowIconOnly] = useState<boolean>(false);
     const [menu, setMenu] = useState<Res[]>([]);
+    let LOCK_DOUBLECLICK: NodeJS.Timeout;
     window.onresize = () => {
         if (window.innerWidth <= 768)
             setIsMobile(true);
@@ -67,8 +70,8 @@ const IndexPage = () => {
     }, [])
 
     useEffect(() => {
-        console.log(menu, "menu")
         setMenuTree(menu)
+        console.log(IconFont, "iconfont")
     }, [showIconOnly, menu])
 
     let setMenuTree = (res: Res[]) => {
@@ -86,20 +89,23 @@ const IndexPage = () => {
                 let menuChildren: Res[] = getChild(item, rows)
                 if (menuChildren.length === 0) {
                     menuList.push(
-                        <Menu.Item icon={<IconFont type={item.icon} />} key={item.id} onClick={() => setNewTabIfAbsent(item.urlTo)}>{showIconOnly && item.menuName}</Menu.Item>
+                        <Menu.Item icon={<IconFont type={item.icon ? item.icon : DEFAULT_ICON} />}
+                            key={item.id}
+                            onClick={() => setNewTabIfAbsent(item.urlTo)}
+                        >
+                            {item.menuName}
+                        </Menu.Item>
                     )
                 } else {
                     let _menuList = getMenuTree(rows, item);
 
                     menuList.push(
-                        <Menu.SubMenu key={item.id} title={item.menuName}>
+                        <Menu.SubMenu icon={<IconFont type={item.icon ? item.icon : DEFAULT_ICON} />} key={item.id} title={item.menuName}>
                             {_menuList}
                         </Menu.SubMenu>
                     );
                 }
             })
-
-            console.log(menuList, "asd")
             return menuList;
         }
 
@@ -139,22 +145,33 @@ const IndexPage = () => {
 
     let onMenuToggleClick = () => {
         if (!sideToggle) {
-            setSideToggle(true)
+            setSideToggle(true);
+            setShowIconOnly(false);
             return;
         }
-        setShowIconOnly(!showIconOnly);
+        clearTimeout(LOCK_DOUBLECLICK)
+        LOCK_DOUBLECLICK = setTimeout(() => {
+            setShowIconOnly(true);
+            setSideToggle(false);
+        }, 300);
     }
 
     let onMenuToggleDoubleClick = () => {
-        setSideToggle(!sideToggle)
+        setSideToggle(!sideToggle);
+        clearTimeout(LOCK_DOUBLECLICK);
     }
-
     return <>
         <Layout style={{ height: "100%" }} className={layout["site-layout"]} >
-            <Sider style={sideToggle ? {} : { marginLeft: "-200px" }} className={layout["site-siderbar"]}>
+            <Sider style={{ ...sideToggle ? {} : { marginLeft: showIconOnly ? "" : "-200px" } }}
+                className={layout["site-siderbar"]}
+                trigger={null}
+                collapsible
+                collapsed={showIconOnly}
+            >
                 {/* {SiderMenu} */}
                 <div className={layout["siderbar-title"]}>
                     <Image
+                        style={{ ...showIconOnly ? { opacity: 0 } : {}, transition: "0.5s all" }}
                         width={200}
                         src={logo}
                         preview={false}
@@ -182,8 +199,8 @@ const IndexPage = () => {
                         </Popover>
                     </div>
                 </Header>
-                <Content className={layout["site-content"]}>
-                    <Tabs hideAdd type="editable-card" onEdit={onEdit} onChange={(activeKey) => setActiveKey(activeKey)} activeKey={activeKey} >
+                <Content className={layout["site-content"] + " site-content-t"}>
+                    <Tabs className="content-tabs" hideAdd type="editable-card" onEdit={onEdit} onChange={(activeKey) => setActiveKey(activeKey)} activeKey={activeKey} >
                         {
                             tabItems.map((item: TabItem) => <TabPane tab={item.title} key={item.id} closable={!item.notCloseable} >
                                 {

@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { findAll } from '../../../api/auth'
+import { findAll, addRecord, updateRecord } from '../../../api/auth'
 import { Button, Row, Col, Space, Table, Modal, Form, Input, Checkbox, Tabs, Card, List } from 'antd'
 import ReactDOM from 'react-dom'
 import UserLov from '../lov/userLov'
@@ -84,7 +84,7 @@ const AuthPage = () => {
                 <Space>
                     <Button type="primary" onClick={() => getData()}>查询</Button>
                     <Button type="primary"
-                        onClick={() => UserModal({ visible: true, operation: "add" }).then(() => getData())}
+                        onClick={() => UserModal({ visible: true, operation: "add" })}
                     >
                         新增
                     </Button>
@@ -102,16 +102,13 @@ const AuthPage = () => {
                                 visible: true,
                                 dataSource: record,
                                 operation: "update"
-                            }).then(() => {
-
-                                getData();
                             })
                         }
                     }
                 }
             } >
         </Table>
-    </div>
+    </div >
 }
 
 declare type operation = "add" | "update"
@@ -119,6 +116,7 @@ interface IUserModalProp {
     visible: boolean,
     dataSource?: dataRow,
     operation: operation,
+    onFinish?: () => {}
 }
 
 interface SysMenuDataSource extends SysMenu {
@@ -126,181 +124,220 @@ interface SysMenuDataSource extends SysMenu {
     key: React.Key
 }
 
-const sysmenuColumns: column[] = [
-    {
-        title: "菜单名称",
-        dataIndex: "menuName",
-        key: "menuName"
-    },
-    {
-        title: "是否启用",
-        dataIndex: "isDeleted",
-        key: "isDeleted",
-        render: (data: number) => <><Checkbox checked={data === 0}></Checkbox></>
-    },
-    {
-        title: "备注",
-        dataIndex: "memo",
-        key: "memo"
-    },
-]
-
-const UserModal = (props: IUserModalProp): Promise<void> => {
+const UserModal = (props: IUserModalProp) => {
     if (!wrap) {
         wrap = document.createElement("div");
         // if (wrap)
         //     document.body && document.body.appendChild(wrap);
     }
-    return new Promise((resolve__, reject__) => {
-        let submitRecord = (data: any): Promise<void> => {
-            if (data.status) data.status = 1;
-            if (!data.status) data.status = 0;
+    let submitRecord = (data: AuthUserGroup): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            if (props.operation === "add") {
+                console.log(data, "data")
+                addRecord(data)
+            }
+            if (props.operation === "update") {
+                updateRecord(data)
+            }
+            if (props.onFinish) props.onFinish();
+        })
+    }
 
-            return new Promise((resolve, reject) => {
-                if (props.operation === "add") { }
-                if (props.operation === "update") { }
-            })
+    let Cmodal = () => {
+        let [visible, setVisible] = useState<boolean>(props.visible);
+        let [userGroup, setUserGroup] = useState<AuthUserGroup>((props.dataSource || { users: [], sysMenus: [] }) as AuthUserGroup);
+        const sysmenuColumns: column[] = [
+            {
+                title: "菜单名称",
+                dataIndex: "menuName",
+                key: "menuName"
+            },
+            {
+                title: "是否启用",
+                dataIndex: "isDeleted",
+                key: "isDeleted",
+                render: (data: number) => <><Checkbox checked={data === 0}></Checkbox></>
+            },
+            {
+                title: "备注",
+                dataIndex: "memo",
+                key: "memo"
+            },
+            {
+                title: "操作",
+                dataIndex: "operation",
+                key: "operation",
+                render: (text: string, record: SysMenu) => <Button type="link" onClick={() => {
+                    let rootNode = record;
+                    let getChildNodeList = (node: SysMenu) => {
+                        let childNodes: SysMenu[] = [];
+                        childNodes.push(node);
+                        let children = getChild(node, userGroup.sysMenus);
+                        for (let item of children) {
+                            childNodes = [...childNodes, ...getChildNodeList(item)]
+                        }
+
+                        return childNodes
+                    }
+                    let deleteList = getChildNodeList(rootNode);
+                    setUserGroup({
+                        ...userGroup,
+                        sysMenus: userGroup.sysMenus.filter(item => {
+                            for (let item1 of deleteList) {
+                                if (item1.id === item.id) return false;
+                            }
+                            return true;
+                        })
+                    })
+                }}>删除</Button>
+            }
+        ]
+        const userColumns: column[] = [
+            {
+                title: 'id',
+                dataIndex: 'id',
+                key: 'id',
+            },
+            {
+                title: '用户名',
+                dataIndex: 'userName',
+                key: 'userName',
+            },
+            {
+                title: '电子邮箱',
+                dataIndex: 'email',
+                key: 'email',
+            },
+            {
+                title: "操作",
+                dataIndex: "operation",
+                key: "operation",
+                render: (text: string, record: UserInfo) => <Button type="link" onClick={() => {
+                    setUserGroup({
+                        ...userGroup,
+                        users: userGroup.users.filter(item => item.id !== record.id)
+                    })
+                }}>删除</Button>
+            }
+        ]
+        let onFinishFailed = () => {
+
         }
+        let onSave = () => {
+            submitRecord(userGroup).then(() => {
+                setVisible(false);
+            });
+        }
+        // let sysMenuDs;
+        // if (userGroup && userGroup.sysMenus) {
+        let rootNode = userGroup.sysMenus.find(item => item.id === 0)
+        if (!rootNode) rootNode = { id: 0, parentId: 0, menuName: "", urlTo: "", isDeleted: "0", createdBy: "", createdDate: "" }
+        let sysMenuDs = getMenuTree(userGroup.sysMenus, rootNode);
+        // }
 
-        let Cmodal = () => {
-            let [visible, setVisible] = useState<boolean>(props.visible);
-            let [userGroup, setUserGroup] = useState<AuthUserGroup>(props.dataSource as AuthUserGroup);
-            let onFinishFailed = () => {
-
-            }
-            let onFinish = (values: any) => {
-                submitRecord(values).then(() => {
-                    setVisible(false);
-                });
-            }
-            let rootNode = userGroup.sysMenus.find(item => item.id === 0)
-            if (!rootNode) rootNode = { id: 0, parentId: 0, menuName: "", urlTo: "", isDeleted: "0", createdBy: "", createdDate: "" }
-            let sysMenuDs = getMenuTree(userGroup.sysMenus, rootNode);
-            return <Modal
-                visible={visible}
-                title={props.operation === "add" ? "新增" : props.operation === "update" ? "修改" : ""}
-                onOk={() => setVisible(false)}
-                onCancel={() => setVisible(false)}
-                footer={null}
-            >
-                <div>
-                    <Row>
-                        <Col span="7" style={{ textAlign: "right" }}>用户组名称:  </Col>
-                        <Col span="16" offset="1">
-                            <Input value={userGroup.groupName}
-                                onChange={(e) => {
-                                    setUserGroup({
-                                        ...userGroup,
-                                        ...{ groupName: e.target.value }
-                                    })
-                                }}
-                            />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span="16" offset="8">
-                            <Checkbox
-                                checked={!!userGroup.isDeleted}
-                                onChange={(e) => { setUserGroup({ ...userGroup, ...{ isDeleted: e.target.checked ? 1 : 0 } }) }}
-                            >
-                                禁用
-                            </Checkbox>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Card style={{ width: "100%" }}>
-                            <Tabs defaultActiveKey="1" style={{ padding: "0px" }}>
-                                <Tabs.TabPane tab="用户" key="1" style={{ height: "300px", overflow: "auto" }}>
-                                    <List
-                                        header={
-                                            <div style={{ textAlign: "right" }}>
-                                                <Space>
-                                                    <Button
-                                                        type="link"
-                                                        onClick={() => UserLov({
-                                                            onSelected: (res) => {
-                                                                if (userGroup.users.findIndex((item) => item.id === res.id) === -1)
-                                                                    setUserGroup({
-                                                                        ...userGroup,
-                                                                        users: [
-                                                                            ...userGroup.users,
-                                                                            ...[res]
-                                                                        ]
-                                                                    })
-                                                            }
-                                                        })}>
-                                                        添加
-                                                    </Button>
-                                                </Space>
-                                            </div>
-                                        }
-                                        size="small"
-                                    >
-                                        {
-                                            userGroup.users.map((item, key) => {
-                                                return <List.Item key={key}>
-                                                    <Row>
-                                                        <Col>{item.id}</Col>
-                                                        <Col>{item.userName}</Col>
-                                                        <Col>{item.email}</Col>
-                                                        <Col>
-                                                            <Space>
-                                                                <Button type="link">删除</Button>
-                                                            </Space>
-                                                        </Col>
-                                                    </Row>
-                                                </List.Item>
-                                            })
-                                        }
-                                    </List>
-                                </Tabs.TabPane>
-                                <Tabs.TabPane tab="菜单" key="2" style={{ height: "300px", overflow: "auto" }}>
-                                    <Space>
-                                        <Button
-                                            type="link"
-                                            onClick={() => SysmenuLov({
-                                                onSelected: (res) => {
+        return <Modal
+            visible={visible}
+            title={props.operation === "add" ? "新增" : props.operation === "update" ? "修改" : ""}
+            onOk={() => setVisible(false)}
+            onCancel={() => setVisible(false)}
+            footer={null}
+        >
+            <div>
+                <Row >
+                    <Col span="7" style={{ textAlign: "right" }}>用户组名称:  </Col>
+                    <Col span="16" offset="1">
+                        <Input value={userGroup.groupName}
+                            onChange={(e) => {
+                                setUserGroup({
+                                    ...userGroup,
+                                    ...{ groupName: e.target.value }
+                                })
+                            }}
+                        />
+                    </Col>
+                </Row>
+                <Row className="m-t-10">
+                    <Col span="16" offset="8">
+                        <Checkbox
+                            checked={!!userGroup.isDeleted}
+                            onChange={(e) => { setUserGroup({ ...userGroup, ...{ isDeleted: e.target.checked ? 1 : 0 } }) }}
+                        >
+                            禁用
+                        </Checkbox>
+                    </Col>
+                </Row>
+                <Row className="m-t-10">
+                    <Card style={{ width: "100%" }}>
+                        <Tabs defaultActiveKey="1" style={{ padding: "0px" }}>
+                            <Tabs.TabPane tab="用户" key="1" style={{ height: "300px", overflow: "auto" }}>
+                                <Space>
+                                    <Button
+                                        type="link"
+                                        onClick={() => UserLov({
+                                            onSelected: (res) => {
+                                                if (userGroup.users.findIndex((item) => item.id === res.id) === -1) {
                                                     setUserGroup({
                                                         ...userGroup,
-                                                        sysMenus: [
-                                                            ...userGroup.sysMenus,
-                                                            ...res.filter((item) => !isExists(item, ['id'], userGroup.sysMenus))
+                                                        users: [
+                                                            ...userGroup.users,
+                                                            ...[res]
                                                         ]
                                                     })
                                                 }
-                                            })}
-                                        >添加</Button>
-                                    </Space>
-                                    <Table
-                                        columns={sysmenuColumns}
-                                        dataSource={sysMenuDs}
-                                        pagination={false} />
-                                </Tabs.TabPane>
-                            </Tabs>
-                        </Card>
-                    </Row>
-                    <Row>
-                        <Col span="16" offset="8">
-                            <Row>
-                                <Col span={11}>
-                                    <Button type="primary" htmlType="submit" block>
-                                        保存
+                                            }
+                                        })}>
+                                        添加
                                     </Button>
-                                </Col>
-                                <Col span={11} offset={2}>
-                                    <Button type="ghost" block onClick={() => setVisible(false)}>
-                                        取消
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Col>
-                    </Row>
-                </div>
-            </Modal>
-        }
+                                </Space>
+                                <Table
+                                    columns={userColumns}
+                                    dataSource={userGroup.users.map((item, key) => { return { ...item, key: key } })}
+                                    pagination={false} />
+                            </Tabs.TabPane>
+                            <Tabs.TabPane tab="菜单" key="2" style={{ height: "300px", overflow: "auto" }}>
+                                <Space>
+                                    <Button
+                                        type="link"
+                                        onClick={() => SysmenuLov({
+                                            onSelected: (res) => {
+                                                setUserGroup({
+                                                    ...userGroup,
+                                                    sysMenus: [
+                                                        ...userGroup.sysMenus,
+                                                        ...res.filter((item) => !isExists(item, ['id'], userGroup.sysMenus))
+                                                    ]
+                                                })
+                                            }
+                                        })}
+                                    >添加</Button>
+                                </Space>
+                                <Table
+                                    columns={sysmenuColumns}
+                                    dataSource={sysMenuDs}
+                                    pagination={false} />
+                            </Tabs.TabPane>
+                        </Tabs>
+                    </Card>
+                </Row>
+                <Row className="m-t-10">
+                    <Col span="24" >
+                        <div className="c-on-right">
+                            <Space>
+                                <Button type="primary" htmlType="submit" onClick={onSave}>
+                                    保存
+                                </Button>
+                                <Button type="ghost" onClick={() => setVisible(false)}>
+                                    取消
+                                </Button>
+                            </Space>
+                        </div>
+                    </Col>
+                </Row>
+            </div>
+        </Modal>
+    }
 
-        ReactDOM.render(<Cmodal></Cmodal>, wrap);
-    })
+    ReactDOM.render(<Cmodal></Cmodal>, wrap);
 }
 
 let getChild = (row: SysMenu, rows: SysMenu[]) => {

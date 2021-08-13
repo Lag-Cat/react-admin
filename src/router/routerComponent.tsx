@@ -13,13 +13,6 @@ const App = () => {
     console.log(window.location.href, getPathName(window.location.href), "hashchange");
     setPathName(getPathName(window.location.href));
   }
-  
-  
-  // window.onpopstate = () => {
-  //   console.log(window.location.href, getPathName(window.location.href), "popstate")
-  //   setPathName(getPathName(window.location.href));
-  // }
-
 
   useEffect(() => {
     _firstLoad = false;

@@ -11,3 +11,36 @@ export const findAll = (): Promise<AuthUserGroup[]> => {
     );
   });
 };
+
+export const addRecord = (data: AuthUserGroup): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/auth/addRecord`, data).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};
+
+export const updateRecord = (data: AuthUserGroup): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/auth/updateRecord`, data).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};
+
+export const deleteRecord = (data: AuthUserGroup): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/auth/deleteRecord`, data).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};

@@ -23,7 +23,7 @@ export const findById = (data: UserInfoId): Promise<UserInfo> => {
   });
 };
 
-export const addUser = (data: UserInfo): Promise<void> => {
+export const addUser = (data: User): Promise<void> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/addUser`, data).then(
       () => {
@@ -34,7 +34,7 @@ export const addUser = (data: UserInfo): Promise<void> => {
   });
 };
 
-export const updateUser = (data: UserInfo): Promise<void> => {
+export const updateUser = (data: User): Promise<void> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/user/updateUser`, data).then(
       () => {

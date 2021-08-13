@@ -1,7 +1,8 @@
 import { Button, Row, Table, Form, Checkbox, Input, message, Col, Modal, Space } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { findAll, findById, addUser, updateUser, deleteUser } from '../../../api/user'
+import { debounce } from '../../../utils/optimize'
 interface dataRow {
     key: string,
     id: number,
@@ -19,6 +20,8 @@ declare type dataSource = dataRow[]
 const { confirm } = Modal;
 const UserPage = () => {
     const [dataSource, setDataSource] = useState<dataSource>();
+    const pageHeight = useRef<HTMLDivElement>(null);
+    const [tableHeight, setTableHeight] = useState<number>(300);
     const columns: column[] = [
         {
             title: 'id',
@@ -68,6 +71,7 @@ const UserPage = () => {
                             content: "是否删除？",
                             onOk() {
                                 deleteUser({ id: record.id }).then(() => {
+                                    message.success("删除成功")
                                     getData();
                                 })
                             }
@@ -82,10 +86,23 @@ const UserPage = () => {
             const resp = res.map((item, key) => { let r = (item as dataRow); r.key = key.toString(); return r; })
             setDataSource(resp);
         })
+
+    }
+
+    let getTableHeight = (reducer: number, minHeight?: number) => {
+        minHeight = minHeight ? minHeight : 300;
+        let ph = pageHeight.current?.parentElement?.clientHeight ? pageHeight.current?.parentElement?.clientHeight : minHeight;
+        if (ph < minHeight) ph = minHeight;
+        return ph - reducer;
     }
 
     useEffect(() => {
         getData();
+        let d_setTableHeight = debounce(() => setTableHeight(getTableHeight(240)), 1000);
+        d_setTableHeight();
+        window.onresize = () => {
+            d_setTableHeight();
+        }
         return () => {
             if (wrap) {
                 ReactDOM.unmountComponentAtNode(wrap);
@@ -93,22 +110,49 @@ const UserPage = () => {
         }
     }, [])
 
-    return <div>
-        <Row>
-            <Col>
-                <Space>
-                    <Button type="primary" onClick={() => getData()}>查询</Button>
-                    <Button type="primary"
-                        onClick={() => UserModal({ visible: true, operation: "add" }).then(() => getData())}
-                    >
-                        新增
-                    </Button>
-                </Space>
+    console.log(tableHeight, pageHeight.current?.parentElement?.clientHeight)
+    return <div ref={pageHeight} style={{ padding: "10px" }}>
+        <Row className="m-t-10">
+            <Col span="11">
+                <Row>
+                    <Col span="8">id：</Col>
+                    <Col span="16"><Input /></Col>
+                </Row>
+            </Col>
+            <Col span="11" offset="2">
+                <Row>
+                    <Col span="8">用户名：</Col>
+                    <Col span="16"><Input /></Col>
+                </Row>
+            </Col>
+        </Row>
+        <Row className="m-t-10">
+            <Col span="11">
+                <Row>
+                    <Col span="8">电子邮箱：</Col>
+                    <Col span="16"><Input /></Col>
+                </Row>
+            </Col>
+            <Col span="11" offset="2">
+                <Row>
+                    <Col span="16" offset="8">
+                        <Space>
+                            <Button type="primary" onClick={() => getData()}>查询</Button>
+                            <Button type="primary"
+                                onClick={() => UserModal({ visible: true, operation: "add" }).then(() => getData())}
+                            >
+                                新增
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
             </Col>
         </Row>
         <Table
             columns={columns}
             dataSource={dataSource}
+            scroll={{ x: 1000, y: tableHeight }}
+
             onRow={
                 record => {
                     return {
@@ -118,7 +162,6 @@ const UserPage = () => {
                                 dataSource: record,
                                 operation: "update"
                             }).then(() => {
-                                message.success("删除成功")
                                 getData();
                             })
                         }
@@ -200,20 +243,25 @@ const UserModal = (props: IUserModalProp): Promise<void> => {
                             <Input />
                         </Form.Item>
                         <Form.Item
+                            label="密码"
+                            name="password"
+                            rules={[{ required: true, message: '请输入密码' }]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
+                        <Form.Item
                             label="电子邮箱"
                             name="email"
-                        // rules={[{ required: true, message: '请输入用户名' }]}
+                            rules={[{ required: true, message: '请输入电子邮箱' }]}
                         >
                             <Input />
                         </Form.Item>
                         <Form.Item
                             label="组id"
                             name="groupId"
-                        // rules={[{ required: true, message: '请输入用户名' }]}
                         >
                             <Input />
                         </Form.Item>
-
                         <Form.Item name="status" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
                             <Checkbox>禁用</Checkbox>
                         </Form.Item>

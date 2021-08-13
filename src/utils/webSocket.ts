@@ -1,30 +1,56 @@
-export const createWebSocket = (
-  url: string,
-  onopen: (e: Event) => any,
-  onmessage: (e: Event) => any,
-  onclose: (e: Event) => any
-) => {
-  let ws = new WebSocket(url);
-  ws.onopen = (e: Event) => {
-    if (onopen) onopen(e);
-  };
-  ws.onmessage = (e: Event) => {
-    if (onmessage) onmessage(e);
-  };
-  ws.onclose = (e: Event) => {
-    if (onclose) onclose(e);
-  };
-  ws.onerror = (e: Event) => {};
-
-  ws.close();
-};
-
-class CreateWebSocket {
+interface IWebSocket {
+  start: () => any;
+  stop: () => any;
+}
+class CreateWebSocket implements IWebSocket {
   constructor(url: string) {
-    this.ws = new WebSocket(url);
+    this.url = url;
+    this.ws = null;
   }
-  private ws: WebSocket;
+  private ws: WebSocket | null;
+  private url: string;
+  private daemonThread: NodeJS.Timeout | undefined;
+  private DAEMONTHREAD_TIME: number = 10;
   private onopen: ((e: Event) => any) | undefined;
   private onmessage: ((e: Event) => any) | undefined;
   private onclose: ((e: Event) => any) | undefined;
+
+  public start = () => {
+    this._run();
+  };
+
+  public stop = () => {
+    this._stop();
+  };
+
+  private _run = () => {
+    if (!this.ws) {
+      this.ws = new WebSocket(this.url);
+      this._createDaemonThread();
+    } else console.warn("ws is running");
+    if (this.onopen) this.ws.onopen = this.onopen;
+    if (this.onmessage) this.ws.onmessage = this.onmessage;
+    if (this.onclose) this.ws.onclose = this.onclose;
+  };
+
+  private _stop = () => {
+    if (this.ws) {
+      this.ws.close();
+      if (this.daemonThread) clearTimeout(this.daemonThread);
+    } else console.warn("ws is closed");
+  };
+
+  private _createDaemonThread = () => {
+    this.daemonThread = setTimeout(() => {
+      if (
+        this.ws?.readyState === WebSocket.CLOSED ||
+        this.ws?.readyState === WebSocket.CLOSING
+      ) {
+        this._stop();
+        this._run();
+      }
+    }, this.DAEMONTHREAD_TIME * 1000);
+  };
 }
+
+export default CreateWebSocket;
