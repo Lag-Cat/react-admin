@@ -183,7 +183,7 @@ const IndexPage = () => {
             </Sider>
 
             <Layout>
-                <Header className={layout["site-header"]}>
+                <Header className={layout["site-header"]} style={{flex:"0 1 auto"}}>
                     <div className={layout["site-header-content"]}>
                         {
                             !sideToggle ?
@@ -199,7 +199,7 @@ const IndexPage = () => {
                         </Popover>
                     </div>
                 </Header>
-                <Content className={layout["site-content"] + " site-content-t"}>
+                <Content className={layout["site-content"] + " site-content-t"} style={{flex:"1"}}>
                     <Tabs className="content-tabs" hideAdd type="editable-card" onEdit={onEdit} onChange={(activeKey) => setActiveKey(activeKey)} activeKey={activeKey} >
                         {
                             tabItems.map((item: TabItem) => <TabPane tab={item.title} key={item.id} closable={!item.notCloseable} >
@@ -210,7 +210,7 @@ const IndexPage = () => {
                         }
                     </Tabs>
                 </Content>
-                <Footer className={layout["site-footer"]}>
+                <Footer className={layout["site-footer"]} style={{flex:"0 1 auto"}}>
                     <div className={layout["site-footer-info"]}>developed by banana</div>
                     <div className={layout["site-footer-btn"]}>
                         <Badge dot>
