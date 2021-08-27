@@ -44,3 +44,14 @@ export const deleteRecord = (data: AuthUserGroup): Promise<void> => {
     );
   });
 };
+
+export const refreshAuthMenu = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/auth/refreshAuthMenu`).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};

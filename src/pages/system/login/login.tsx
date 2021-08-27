@@ -29,7 +29,7 @@ const LoginPage = () => {
             message.success('登录成功');
             dispatch({ type: "SET_TOKEN", payload: { token: res.token.token } });
             setTimeout(() => {
-                router.push({ path: "/" })
+                router.push({ path: "/index" })
             }, 1 * 2000);
         })
     }

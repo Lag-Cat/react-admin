@@ -8,6 +8,8 @@ interface dataRow {
     id: number,
     userName: string,
     email: string,
+    sex: string;
+    phone: string;
     status: string,
     groupId: string,
     createdAt: string,

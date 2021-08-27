@@ -34,6 +34,11 @@ const MenuPage = () => {
             render: (data: number) => <><Checkbox checked={data === 0}></Checkbox></>
         },
         {
+            title: "顺序",
+            dataIndex: "seq",
+            key: "seq",
+        },
+        {
             title: "备注",
             dataIndex: "memo",
             key: "memo"
@@ -58,7 +63,7 @@ const MenuPage = () => {
                         <Button
                             type="link"
                             onClick={() => {
-                                cModal({ operation: "update", visible: true }).then(() => {
+                                cModal({ operation: "update", visible: true, dataSource: record }).then(() => {
                                     getData();
                                 })
                             }}
@@ -99,7 +104,15 @@ const MenuPage = () => {
                         menuList.push({ ...item, key: item.id })
                     } else {
                         let _menuList = getMenuTree(rows, item);
-
+                        if (_menuList.length > 1) {
+                            _menuList.sort((a, b) => {
+                                let seqA = a.seq || 0, seqB = b.seq || 0;
+                                if (seqA > seqB)
+                                    return 1;
+                                else
+                                    return -1
+                            })
+                        }
                         menuList.push({ ...item, key: item.id, children: _menuList });
                     }
                 })
@@ -213,6 +226,12 @@ const cModal = (props: IUserModalProp): Promise<void> => {
                             name="urlTo"
                         >
                             <Input />
+                        </Form.Item>
+                        <Form.Item
+                            label="顺序"
+                            name="seq"
+                        >
+                            <Input type="number" />
                         </Form.Item>
                         <Form.Item
                             label="备注"

@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { findAll, addRecord, updateRecord } from '../../../api/auth'
-import { Button, Row, Col, Space, Table, Modal, Form, Input, Checkbox, Tabs, Card, List } from 'antd'
+import { findAll, addRecord, updateRecord, deleteRecord, refreshAuthMenu } from '../../../api/auth'
+import { Button, Row, Col, Space, Table, Modal, Form, Input, Checkbox, Tabs, Card, List, message } from 'antd'
 import ReactDOM from 'react-dom'
 import UserLov from '../lov/userLov'
 import SysmenuLov from '../lov/sysmenuLov'
@@ -23,6 +23,7 @@ declare type dataSource = dataRow[]
 let wrap: HTMLElement;
 const AuthPage = () => {
     const [dataSource, setDataSource] = useState<dataSource>();
+    const [refreshMenuBtnState, setRefreshMenuBtnState] = useState<boolean>(false);
     const columns: column[] = [
         {
             title: 'id',
@@ -55,7 +56,13 @@ const AuthPage = () => {
                 <Button
                     type="link"
                     onClick={() => {
-
+                        Modal.confirm({
+                            title: "提醒",
+                            content: "是否删除?",
+                            onOk() {
+                                deleteRecord(record).then(() => { getData() })
+                            }
+                        })
                     }}>
                     删除
                 </Button>
@@ -84,9 +91,22 @@ const AuthPage = () => {
                 <Space>
                     <Button type="primary" onClick={() => getData()}>查询</Button>
                     <Button type="primary"
-                        onClick={() => UserModal({ visible: true, operation: "add" })}
+                        onClick={() => UserModal({ visible: true, operation: "add", onFinish: () => { getData() } })}
                     >
                         新增
+                    </Button>
+                    <Button
+                        type="primary"
+                        loading={refreshMenuBtnState}
+                        onClick={() => {
+                            setRefreshMenuBtnState(true);
+                            refreshAuthMenu().then(() => {
+                                message.success("刷新成功");
+                                setRefreshMenuBtnState(false);
+                            })
+                        }}
+                    >
+                        刷新菜单
                     </Button>
                 </Space>
             </Col>
@@ -101,7 +121,8 @@ const AuthPage = () => {
                             UserModal({
                                 visible: true,
                                 dataSource: record,
-                                operation: "update"
+                                operation: "update",
+                                onFinish: () => { getData() }
                             })
                         }
                     }
@@ -116,12 +137,12 @@ interface IUserModalProp {
     visible: boolean,
     dataSource?: dataRow,
     operation: operation,
-    onFinish?: () => {}
+    onFinish?: () => any
 }
 
 interface SysMenuDataSource extends SysMenu {
     children?: SysMenuDataSource[]
-    key: React.Key
+    key: React.Key,
 }
 
 const UserModal = (props: IUserModalProp) => {
@@ -133,13 +154,17 @@ const UserModal = (props: IUserModalProp) => {
     let submitRecord = (data: AuthUserGroup): Promise<void> => {
         return new Promise((resolve, reject) => {
             if (props.operation === "add") {
-                console.log(data, "data")
-                addRecord(data)
+                addRecord(data).then(() => {
+                    if (props.onFinish) props.onFinish();
+                    resolve();
+                })
             }
             if (props.operation === "update") {
-                updateRecord(data)
+                updateRecord(data).then(() => {
+                    if (props.onFinish) props.onFinish();
+                    resolve();
+                })
             }
-            if (props.onFinish) props.onFinish();
         })
     }
 
@@ -231,7 +256,7 @@ const UserModal = (props: IUserModalProp) => {
         // let sysMenuDs;
         // if (userGroup && userGroup.sysMenus) {
         let rootNode = userGroup.sysMenus.find(item => item.id === 0)
-        if (!rootNode) rootNode = { id: 0, parentId: 0, menuName: "", urlTo: "", isDeleted: "0", createdBy: "", createdDate: "" }
+        if (!rootNode) rootNode = { id: 0, parentId: 0, menuName: "", urlTo: "", isDeleted: "0", createdBy: "", createdDate: "", icon: "" }
         let sysMenuDs = getMenuTree(userGroup.sysMenus, rootNode);
         // }
 

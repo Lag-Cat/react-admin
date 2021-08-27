@@ -1,10 +1,10 @@
 import { createStore, combineReducers } from "redux";
 
-import router from "./reducers/router";
+import indexPage from "./reducers/indexPage";
 import system from "./reducers/system";
 
 const reducers = combineReducers({
-  router,
+  indexPage,
   system,
 });
 

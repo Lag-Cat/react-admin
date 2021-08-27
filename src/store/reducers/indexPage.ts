@@ -1,9 +1,20 @@
-const defaultState: IRouterRedux = {
+import { IndexPageActionEunm } from "./types/indexPage";
+
+declare type IndexPageActionT = {
+  type: IndexPageActionEunm;
+  payload: any;
+};
+
+const defaultState: IIndexPageRedux = {
   tabItems: [],
+  drawBar: [],
   activeKey: "",
 };
 
-export default (state = defaultState, action: any) => {
+export default (
+  state = defaultState,
+  action: IndexPageActionT
+): IIndexPageRedux => {
   switch (action.type) {
     case "ROUTER_ADD":
       return {
@@ -33,6 +44,26 @@ export default (state = defaultState, action: any) => {
       return {
         ...state,
         activeKey: action.payload,
+      };
+    case "ADD_NOTICE":
+      return {
+        ...state,
+        drawBar: [...state.drawBar, ...[action.payload]],
+      };
+    case "REMOVE_NOTICE":
+      return {
+        ...state,
+        drawBar: state.drawBar.filter((item) => item.id !== action.payload),
+      };
+    case "UPDATE_NOTICE":
+      return {
+        ...state,
+        drawBar: state.drawBar.map((item) => {
+          if (item.id === action.payload.id) {
+            item = action.payload;
+          }
+          return item;
+        }),
       };
     default:
       return state;

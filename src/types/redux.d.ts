@@ -3,11 +3,12 @@ declare interface IAction<T> {
   payLoad: T;
 }
 
-declare interface IRouterRedux {
+declare interface IIndexPageRedux {
   tabItems: TabItem[];
+  drawBar: INotice[];
   activeKey: string;
 }
 
 declare interface IReduxIndex {
-  router: IRouterRedux;
+  indexPage: IIndexPageRedux;
 }

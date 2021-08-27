@@ -1,8 +1,9 @@
 import { BRouter } from "./IRouter";
 import React from "react";
 
-import chatRouter from "./routers/chat";
-import system from "./routers/system";
+import chatRouter from "./routes/chat";
+import system from "./routes/system";
+import test from "./routes/test";
 
 const indexRouter: BRouter.IRouter[] = [
   {
@@ -11,6 +12,13 @@ const indexRouter: BRouter.IRouter[] = [
     title: "首页",
     component: React.lazy(() => import("../pages/home/home")),
     notCloseable: true,
+  },
+  {
+    name: "homePage",
+    path: "/",
+    title: "首页",
+    component: React.lazy(() => import("../pages/system/login/login")),
+    allowTop: true,
   },
   {
     name: "personalSettings",
@@ -56,13 +64,18 @@ const indexRouter: BRouter.IRouter[] = [
   },
   {
     name: "index",
-    path: "/",
+    path: "/index",
     title: "主页",
     component: React.lazy(() => import("../pages/system/indexPage")),
     allowTop: true,
   },
 ];
 
-const routers: BRouter.IRouter[] = [...indexRouter, ...chatRouter, ...system];
+const routers: BRouter.IRouter[] = [
+  ...indexRouter,
+  ...chatRouter,
+  ...system,
+  ...test,
+];
 
 export default routers;

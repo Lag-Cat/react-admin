@@ -18,6 +18,17 @@ export const login = (data: {
   });
 };
 
+export const loginOut = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/loginOut`).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};
+
 export const getSysMenuList = (): Promise<
   {
     id: number;
@@ -25,6 +36,7 @@ export const getSysMenuList = (): Promise<
     menuName: string;
     urlTo: string;
     icon: string;
+    isRoot: number;
     isDeleted: string;
     createdBy: string;
     createdDate: string;

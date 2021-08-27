@@ -1,1 +1,1 @@
-export declare type systemAction = "SET_TOKEN";
+export declare type SystemActionEnum = "SET_TOKEN";

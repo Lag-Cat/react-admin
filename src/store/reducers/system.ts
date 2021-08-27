@@ -1,13 +1,13 @@
-import { systemAction } from "./types/system";
+import { SystemActionEnum } from "./types/system";
 
 const defaultState = {};
 
-interface IAction {
-  type: systemAction;
+interface SystemActionType {
+  type: SystemActionEnum;
   payload: any;
 }
 
-export default (state = defaultState, action: IAction) => {
+export default (state = defaultState, action: SystemActionType) => {
   switch (action.type) {
     case "SET_TOKEN": {
       localStorage.setItem("token", action.payload.token);

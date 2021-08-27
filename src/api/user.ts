@@ -55,3 +55,24 @@ export const deleteUser = (data: UserInfoId): Promise<void> => {
     );
   });
 };
+
+export const getCurrentUserInfo = (): Promise<UserInfo> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/user/getCurrentUserInfo`).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};
+export const updateUserInfo = (data: UserInfoM): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    axios.post(`${baseUrl}/api/user/updateUserInfo`, data).then(
+      (res) => {
+        resolve(res);
+      },
+      () => reject()
+    );
+  });
+};

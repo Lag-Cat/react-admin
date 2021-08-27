@@ -18,4 +18,12 @@ export default [
     title: "权限设置",
     component: React.lazy(() => import("../../pages/system/auth/authPage")),
   },
+  {
+    name: "userSettings",
+    path: "/user/userSettings",
+    title: "用户个人设置",
+    component: React.lazy(
+      () => import("../../pages/system/users/userSettings")
+    ),
+  },
 ];

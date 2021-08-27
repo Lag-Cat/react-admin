@@ -13,9 +13,10 @@ import layout from './index.module.scss'
 import React, { ReactNode, useEffect, useState, Suspense } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { router } from '../../router'
-import { setNewTabIfAbsent, setActiveKey } from './lib/indexPage'
+import { setNewTabIfAbsent, setActiveKey, removeNoticeItem, readNoticeItem } from './lib/indexPage'
 import { getSysMenuList } from '../../api/system'
 import logo from '../../assets/img/logo.png'
+import { loginOut } from './lib/indexPage'
 import { create } from 'domain';
 import './index.scss'
 
@@ -25,12 +26,12 @@ const IconFont = createFromIconfontCN({
 const DEFAULT_ICON = "icon-moren"
 const { Header, Footer, Sider, Content } = Layout
 const { TabPane } = Tabs;
-interface Notice {
-    id: string,
-    title: string,
-    content: string,
-    __isClose: boolean
-}
+// interface Notice {
+//     id: string,
+//     title: string,
+//     content: string,
+//     __isClose: boolean
+// }
 
 interface Res {
     id: number;
@@ -39,6 +40,8 @@ interface Res {
     urlTo: string;
     isDeleted: string;
     createdBy: string;
+    isRoot: number;
+    seq?: number;
     createdDate: string;
     icon: string;
 }
@@ -46,11 +49,12 @@ interface Res {
 const IndexPage = () => {
     const [sideToggle, setSideToggle] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
-    const activeKey = useSelector((state: IReduxIndex) => state.router.activeKey)
+    const activeKey = useSelector((state: IReduxIndex) => state.indexPage.activeKey)
     const [visible, setVisible] = useState<boolean>();
-    const [notice, setNotice] = useState<Notice[]>();
+    //const [notice, setNotice] = useState<INotice[]>([]);
     const dispatch = useDispatch();
-    const tabItems = useSelector((state: IReduxIndex) => state.router.tabItems)
+    const tabItems = useSelector((state: IReduxIndex) => state.indexPage.tabItems)
+    const notice = useSelector((state: IReduxIndex) => state.indexPage.drawBar);
     const [MainMenu, setMainMenu] = useState<ReactNode[]>();
     const [showIconOnly, setShowIconOnly] = useState<boolean>(false);
     const [menu, setMenu] = useState<Res[]>([]);
@@ -75,43 +79,14 @@ const IndexPage = () => {
     }, [showIconOnly, menu])
 
     let setMenuTree = (res: Res[]) => {
-        console.log(res);
-        let getChild = (row: Res, rows: Res[]) => {
-            return rows.filter(item => row.id === item.parentId);
-        }
+        let rootNode = res.find(item => item.isRoot === 1)
+        if (!rootNode)
+            rootNode = { id: 0, parentId: 0, menuName: "", urlTo: "", isDeleted: "0", createdBy: "", createdDate: "", isRoot: 1, icon: "" };
 
-        let getMenuTree = (rows: Res[], node?: Res) => {
-            let menuList: ReactNode[] = [];
-            rows.forEach(item => {
-                if (item.id === 0) return;
-                if (node && node.id !== item.parentId) return;
+        let menuTmp = getMenuTree(res, rootNode);
+        let _memu = renderTree(menuTmp);
 
-                let menuChildren: Res[] = getChild(item, rows)
-                if (menuChildren.length === 0) {
-                    menuList.push(
-                        <Menu.Item icon={<IconFont type={item.icon ? item.icon : DEFAULT_ICON} />}
-                            key={item.id}
-                            onClick={() => setNewTabIfAbsent(item.urlTo)}
-                        >
-                            {item.menuName}
-                        </Menu.Item>
-                    )
-                } else {
-                    let _menuList = getMenuTree(rows, item);
-
-                    menuList.push(
-                        <Menu.SubMenu icon={<IconFont type={item.icon ? item.icon : DEFAULT_ICON} />} key={item.id} title={item.menuName}>
-                            {_menuList}
-                        </Menu.SubMenu>
-                    );
-                }
-            })
-            return menuList;
-        }
-
-        let rootNode = res.find(item => item.id === 0)
-        let menu = getMenuTree(res, rootNode);
-        setMainMenu(menu);
+        setMainMenu(_memu);
     }
 
     let onEdit = (targetKey: string | React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent<Element>, action: "add" | "remove") => {
@@ -130,17 +105,9 @@ const IndexPage = () => {
         //setTabItems(tabItems.filter(item => item.id !== targetKey))
     }
 
-    let onDrawItemCloseClick = (item: Notice) => {
-        setNotice(notice?.map(item1 => {
-            if (item1.id === item.id) {
-                item1.__isClose = true;
-            }
-            return item1
-        }))
 
-        setTimeout(() => {
-            setNotice(notice?.filter(item1 => !item1.__isClose))
-        }, 1000 * 1);
+    let onDrawItemCloseClick = (item: INotice) => {
+        removeNoticeItem(item);
     }
 
     let onMenuToggleClick = () => {
@@ -159,6 +126,19 @@ const IndexPage = () => {
     let onMenuToggleDoubleClick = () => {
         setSideToggle(!sideToggle);
         clearTimeout(LOCK_DOUBLECLICK);
+    }
+
+    let toggleDrawBar = () => {
+        if (!visible) {
+            for (let item of notice) {
+                readNoticeItem(item);
+            }
+        }
+        setVisible(!visible)
+    }
+
+    let onLoginOut = () => {
+        loginOut();
     }
     return <>
         <Layout style={{ height: "100%" }} className={layout["site-layout"]} >
@@ -183,7 +163,7 @@ const IndexPage = () => {
             </Sider>
 
             <Layout>
-                <Header className={layout["site-header"]} style={{flex:"0 1 auto"}}>
+                <Header className={layout["site-header"]} style={{ flex: "0 1 auto" }}>
                     <div className={layout["site-header-content"]}>
                         {
                             !sideToggle ?
@@ -191,15 +171,15 @@ const IndexPage = () => {
                                 : <MenuFoldOutlined onClick={onMenuToggleClick} onDoubleClick={onMenuToggleDoubleClick} className={layout["site-header-content-icon"]} />
                         }
                         <Popover placement="bottomRight" content={<>
-                            <div><a>设置</a></div>
-                            <div><a onClick={() => router.push({ path: "/login" })}>注销</a></div>
+                            <div><a onClick={() => setNewTabIfAbsent("/user/userSettings")}>设置</a></div>
+                            <div><a onClick={onLoginOut}>注销</a></div>
                         </>
                         } trigger="click">
                             <Avatar size={36} icon={<UserOutlined />} />
                         </Popover>
                     </div>
                 </Header>
-                <Content className={layout["site-content"] + " site-content-t"} style={{flex:"1"}}>
+                <Content className={layout["site-content"] + " site-content-t"} style={{ flex: "1" }}>
                     <Tabs className="content-tabs" hideAdd type="editable-card" onEdit={onEdit} onChange={(activeKey) => setActiveKey(activeKey)} activeKey={activeKey} >
                         {
                             tabItems.map((item: TabItem) => <TabPane tab={item.title} key={item.id} closable={!item.notCloseable} >
@@ -210,11 +190,11 @@ const IndexPage = () => {
                         }
                     </Tabs>
                 </Content>
-                <Footer className={layout["site-footer"]} style={{flex:"0 1 auto"}}>
+                <Footer className={layout["site-footer"]} style={{ flex: "0 1 auto" }}>
                     <div className={layout["site-footer-info"]}>developed by banana</div>
                     <div className={layout["site-footer-btn"]}>
-                        <Badge dot>
-                            <AppstoreOutlined onClick={() => setVisible(!visible)} />
+                        <Badge dot={notice?.filter(item => !item.read).length > 0 ? true : false}>
+                            <AppstoreOutlined onClick={toggleDrawBar} />
                         </Badge>
                     </div>
                 </Footer>
@@ -241,4 +221,56 @@ const IndexPage = () => {
     </>
 }
 
+interface MenuTreeType extends SysMenu { key: React.Key, children?: MenuTreeType[] }
+
+let getMenuTree = (rows: SysMenu[], node?: SysMenu) => {
+    let menuList: MenuTreeType[] = [];
+    rows.forEach(item => {
+        if (item.id === 0) return;
+        if (node && node.id !== item.parentId) return;
+
+        let menuChildren: SysMenu[] = getChild(item, rows)
+        if (menuChildren.length === 0) {
+            menuList.push({ ...item, key: item.id })
+        } else {
+            let _menuList = getMenuTree(rows, item);
+            menuList.push({ ...item, key: item.id, children: _menuList });
+        }
+    })
+
+    return menuList;
+}
+
+let getChild = (row: SysMenu, rows: SysMenu[]) => {
+    return rows.filter(item => row.id === item.parentId);
+}
+
+let renderTree = (node: MenuTreeType[]) => {
+    let menu: React.ReactNode[] = []
+    if (node.length > 1) {
+        node.sort((a, b) => {
+            let seqA = a.seq || 0, seqB = b.seq || 0;
+            if (seqA > seqB)
+                return 1;
+            else
+                return -1
+        })
+    }
+    node.forEach(item => {
+        if (!item.children) {
+            menu.push(<Menu.Item icon={<IconFont type={item.icon ? item.icon : DEFAULT_ICON} />}
+                key={item.id}
+                onClick={() => setNewTabIfAbsent(item.urlTo)}
+            >
+                {item.menuName}
+            </Menu.Item>)
+        } else {
+            let _menuList = renderTree(item.children);
+            menu.push(<Menu.SubMenu icon={<IconFont type={item.icon ? item.icon : DEFAULT_ICON} />} key={item.id} title={item.menuName}>
+                {_menuList}
+            </Menu.SubMenu>)
+        }
+    })
+    return menu;
+}
 export default IndexPage

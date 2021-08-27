@@ -3,6 +3,9 @@ interface SysMenu {
   parentId: number;
   menuName: string;
   urlTo: string;
+  isRoot?: number;
+  seq?: number;
+  icon: string;
   isDeleted: string;
   createdBy: string;
   createdDate: string;

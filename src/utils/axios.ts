@@ -81,7 +81,7 @@ instance.interceptors.response.use(
           msg = "";
           break;
         case 401:
-          msg = "登录失败,请重新登录";
+          msg = "身份验证失败，请重新登录";
           break;
         case 403:
           msg = "访问被拒绝";
