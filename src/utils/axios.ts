@@ -10,6 +10,7 @@ declare interface IAxiosResponse {
 declare interface IHttp {
   get: (url: string, param?: any) => Promise<any>;
   post: (url: string, data?: any, param?: any) => Promise<any>;
+  upload: (url: string, file: File) => Promise<any>;
 }
 declare interface IErrInfo {
   status: number;
@@ -158,6 +159,26 @@ const post = function (url: string, data: any, params: any) {
   });
 };
 
-const http: IHttp = { get, post };
+const upload = (url: string, file: File) => {
+  return new Promise((resolve, reject) => {
+    let config = {
+      headers: { "Content-Type": "multipart/form-data" },
+    };
+    let param = new FormData();
+    param.append("file", file);
+    console.log(param,"adsakldjalsdjakl")
+    instance.post(url, {file:param}).then((response: any) => {
+      if (response.code === 0 || response.code === 200) {
+        resolve(response.data);
+      } else {
+        // message.error(response.msg, 2);
+        // reject(response.data.msg);
+        reject();
+      }
+    });
+  });
+};
+
+const http: IHttp = { get, post, upload };
 // 导出文件
 export default http;

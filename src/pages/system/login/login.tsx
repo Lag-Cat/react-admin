@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Button, Form, Input, Checkbox, message, Divider, Row, Col, Card } from "antd";
 import styles from "./index.module.scss";
-import { login } from '../../../api/system'
+// import { login } from '../../../api/system'
 import { useDispatch } from 'react-redux'
 import { router } from '../../../router'
+import { login } from '../lib/system'
 const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
@@ -25,9 +26,8 @@ const LoginPage = () => {
             message.error("请输入密码");
             return;
         }
-        login({ account, password }).then((res) => {
+        login(account, password).then((res) => {
             message.success('登录成功');
-            dispatch({ type: "SET_TOKEN", payload: { token: res.token.token } });
             setTimeout(() => {
                 router.push({ path: "/index" })
             }, 1 * 2000);

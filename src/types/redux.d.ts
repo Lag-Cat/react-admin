@@ -8,7 +8,13 @@ declare interface IIndexPageRedux {
   drawBar: INotice[];
   activeKey: string;
 }
+declare interface ISystemRedux {
+  token: IToken;
+  userInfo: UserPublicInfo;
+  photo?: string;
+}
 
 declare interface IReduxIndex {
   indexPage: IIndexPageRedux;
+  system: ISystemRedux;
 }

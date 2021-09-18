@@ -1,13 +1,14 @@
 import axios from "../utils/axios";
 import { baseUrl } from "../utils/config";
 
+export type loginResType = {
+  token: { token: string };
+  userInfo: { id: number; userName: string };
+};
 export const login = (data: {
   account: string;
   password: string;
-}): Promise<{
-  token: { token: string };
-  userInfo: { id: number; userName: string };
-}> => {
+}): Promise<loginResType> => {
   return new Promise((resolve, reject) => {
     axios.post(`${baseUrl}/api/login`, data).then(
       (res) => {

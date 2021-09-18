@@ -13,3 +13,42 @@
     }
   }
 }
+
+.site-drawer-notice {
+  flex: 1 1 auto;
+  overflow: auto;
+  &-item {
+    margin: 15px 2px;
+    transition: 0.5s all;
+    &-extra {
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: row;
+    }
+    &-btn {
+      background: inherit;
+      display: inline-block;
+      transition: background-color 1s;
+      padding: 0 1px;
+      line-height: 16px;
+      &:hover {
+        background: #cdcdcd;
+      }
+      & > :first-child {
+        background: #fff;
+      }
+    }
+
+    &:hover {
+      box-shadow: 0 0 10px 0px #ededed;
+    }
+
+    &-close {
+      animation: drawerItemClose 1s;
+      animation-fill-mode: forwards;
+    }
+  }
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+}

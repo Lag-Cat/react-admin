@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import ImgCrop from 'antd-img-crop';
 import { getCurrentUserInfo, updateUserInfo } from '../../../api/user'
 import { UploadChangeParam } from 'antd/lib/upload';
-import { UploadFile } from 'antd/lib/upload/interface';
+import { RcFile, UploadFile } from 'antd/lib/upload/interface';
+import { upload } from '../../../api/files'
 const { Option } = Select;
 const layout = {
     labelCol: { span: 8 },
@@ -12,13 +13,15 @@ const layout = {
 const tailLayout = {
     wrapperCol: { offset: 8, span: 16 },
 };
+let photo = ""
 const UserSettingPage = () => {
-    const [data, setData] = useState<UserInfo>();
+    // const [data, setData] = useState<UserInfo>();
+
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState<UploadFile<any>[]>([]);
     const onFinish = (values: UserInfoM) => {
-        console.log(values);
-        updateUserInfo(values).then(() => {
+
+        updateUserInfo({ ...values, photo: photo }).then(() => {
             message.success("保存成功")
         })
     };
@@ -34,8 +37,10 @@ const UserSettingPage = () => {
         setFileList(info.fileList);
     };
 
-    const beforeUpload = (file: UploadFile<any>) => {
+    const beforeUpload = (file: RcFile) => {
         setFileList([...fileList, file])
+        upload("1", file);
+        console.log(file);
         return false
     }
 
@@ -66,13 +71,24 @@ const UserSettingPage = () => {
                     <Radio value="female">女</Radio>
                 </Radio.Group>
             </Form.Item>
-            <Form.Item name="photo" label="头像">
+            <Form.Item name="photo1" label="头像">
                 <ImgCrop rotate>
                     <Upload
                         listType="picture-card"
-                        beforeUpload={beforeUpload}
-                        // fileList={fileList}
-                        // onChange={onChange}
+                        action="http://10.2.78.52:46082/ftp/upload"
+                        headers={{
+                            Authorization: localStorage.getItem("token") || ""
+                        }}
+                        name="file"
+                        onChange={(info) => {
+                            console.log(info.file.response)
+                            if (info.file.status === 'done') {
+                                photo = info.file.response.data;
+                            }
+                        }}
+                        // beforeUpload={beforeUpload}
+                        // // fileList={fileList}
+                        // // onChange={onChange}
                         maxCount={1}
                     >
                         {fileList.length < 1 && '+ Upload'}
@@ -81,13 +97,10 @@ const UserSettingPage = () => {
             </Form.Item>
             <Form.Item {...tailLayout}>
                 <Button type="primary" htmlType="submit">
-                    Submit
+                    保存
                 </Button>
                 <Button htmlType="button" onClick={onReset}>
-                    Reset
-                </Button>
-                <Button type="link" htmlType="button" onClick={onFill}>
-                    Fill form
+                    取消
                 </Button>
             </Form.Item>
         </Form>

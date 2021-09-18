@@ -1,6 +1,9 @@
 import { SystemActionEnum } from "./types/system";
 
-const defaultState = {};
+const defaultState = {
+  token: {},
+  userInfo: {},
+};
 
 interface SystemActionType {
   type: SystemActionEnum;
@@ -10,9 +13,10 @@ interface SystemActionType {
 export default (state = defaultState, action: SystemActionType) => {
   switch (action.type) {
     case "SET_TOKEN": {
-      localStorage.setItem("token", action.payload.token);
       return { ...state, token: action.payload.token };
     }
+    case "SET_USERINFO":
+      return { ...state, userInfo: action.payload.userInfo };
     default:
       return state;
   }

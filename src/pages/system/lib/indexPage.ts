@@ -1,7 +1,7 @@
 import store from "../../../store/index";
 import routes from "../../../router/indexRoutes";
 import { notification } from "antd";
-import { loginOut as _loginOut } from "../../../api/system";
+import { loginOut as _loginOut, login as _login } from "../../../api/system";
 import { router } from "../../../router";
 
 export const setActiveKey = (activeKey: string) => {
@@ -78,6 +78,8 @@ export const readNoticeItem = (noticeConfig: INotice) => {
     payload: nConf,
   });
 };
+
+
 
 export const loginOut = () => {
   _loginOut().then(() => {

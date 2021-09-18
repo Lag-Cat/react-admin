@@ -3,17 +3,17 @@ import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { findAll, findById, addUser, updateUser, deleteUser } from '../../../api/user'
 import { debounce } from '../../../utils/optimize'
-interface dataRow {
+interface dataRow extends UserInfo {
     key: string,
-    id: number,
-    userName: string,
-    email: string,
-    sex: string;
-    phone: string;
-    status: string,
-    groupId: string,
-    createdAt: string,
-    updatedAt: string
+    // id: number,
+    // userName: string,
+    // email: string,
+    // sex: string;
+    // phone: string;
+    // status: string,
+    // groupId: string,
+    // createdAt: string,
+    // updatedAt: string
 }
 declare type dataSource = dataRow[]
 
@@ -100,10 +100,9 @@ const UserPage = () => {
 
     useEffect(() => {
         getData();
-        let d_setTableHeight = debounce(() => setTableHeight(getTableHeight(240)), 1000);
-        d_setTableHeight();
+        setTableHeight(getTableHeight(240));
         window.onresize = () => {
-            d_setTableHeight();
+            setTableHeight(getTableHeight(240));
         }
         return () => {
             if (wrap) {

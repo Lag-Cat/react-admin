@@ -21,6 +21,7 @@ interface dataSource extends SysMenu {
 
 const MenuPage = () => {
     const [dataSource, setDataSource] = useState<dataSource[]>();
+    const [tableHeight, setTableHeight] = useState<number>(300);
     const columns: column[] = [
         {
             title: "菜单名称",
@@ -127,6 +128,7 @@ const MenuPage = () => {
     }
 
     useEffect(() => {
+
         getData();
     }, [])
 

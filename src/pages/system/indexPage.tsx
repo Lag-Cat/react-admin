@@ -1,13 +1,13 @@
-import { Layout, Menu, Breadcrumb, Avatar, Popover, Tabs, Button, Divider, Drawer, Card, Badge, Image } from 'antd'
+import { Layout, Menu, Breadcrumb, Avatar, Popover, Tabs, Button, Divider, Drawer, Card, Badge, Image, Switch } from 'antd'
 import {
     MenuUnfoldOutlined,
     MenuFoldOutlined,
     UserOutlined,
-    VideoCameraOutlined,
-    UploadOutlined,
+    SettingOutlined,
     CloseOutlined,
     AppstoreOutlined,
-    createFromIconfontCN
+    createFromIconfontCN,
+    LogoutOutlined
 } from '@ant-design/icons';
 import layout from './index.module.scss'
 import React, { ReactNode, useEffect, useState, Suspense } from 'react'
@@ -55,6 +55,7 @@ const IndexPage = () => {
     const dispatch = useDispatch();
     const tabItems = useSelector((state: IReduxIndex) => state.indexPage.tabItems)
     const notice = useSelector((state: IReduxIndex) => state.indexPage.drawBar);
+    const userInfo = useSelector((state: IReduxIndex) => state.system.userInfo);
     const [MainMenu, setMainMenu] = useState<ReactNode[]>();
     const [showIconOnly, setShowIconOnly] = useState<boolean>(false);
     const [menu, setMenu] = useState<Res[]>([]);
@@ -170,13 +171,23 @@ const IndexPage = () => {
                                 <MenuUnfoldOutlined onClick={onMenuToggleClick} onDoubleClick={onMenuToggleDoubleClick} className={layout["site-header-content-icon"]} />
                                 : <MenuFoldOutlined onClick={onMenuToggleClick} onDoubleClick={onMenuToggleDoubleClick} className={layout["site-header-content-icon"]} />
                         }
-                        <Popover placement="bottomRight" content={<>
-                            <div><a onClick={() => setNewTabIfAbsent("/user/userSettings")}>设置</a></div>
-                            <div><a onClick={onLoginOut}>注销</a></div>
-                        </>
-                        } trigger="click">
-                            <Avatar size={36} icon={<UserOutlined />} />
-                        </Popover>
+                        <div className={layout["site-header-content-right"]}>
+                            <div>{userInfo ? '欢迎您，' + userInfo.userName : "请登录"}</div>
+                            <Popover placement="bottomRight" content={<div style={{ display: "flex", flexDirection: "column" }}>
+                                <Button icon={<SettingOutlined />} type="link" onClick={() => setNewTabIfAbsent("/user/userSettings")}>个人中心</Button>
+                                <Button icon={<SettingOutlined />} type="link" onClick={() => setNewTabIfAbsent("/user/userSettings")}>用户设置</Button>
+                                <Divider style={{ margin: "5px 0" }} />
+                                <Button icon={<LogoutOutlined />} type="link" onClick={onLoginOut}>退出登录</Button>
+                            </div>
+                            } trigger="hover">
+                                <Avatar
+                                    size={36}
+                                    src={"http://10.2.78.52:46082/ftp/file/"+userInfo.photo}
+                                />
+
+                            </Popover>
+
+                        </div>
                     </div>
                 </Header>
                 <Content className={layout["site-content"] + " site-content-t"} style={{ flex: "1" }}>
@@ -191,6 +202,7 @@ const IndexPage = () => {
                     </Tabs>
                 </Content>
                 <Footer className={layout["site-footer"]} style={{ flex: "0 1 auto" }}>
+                    <div></div>
                     <div className={layout["site-footer-info"]}>developed by banana</div>
                     <div className={layout["site-footer-btn"]}>
                         <Badge dot={notice?.filter(item => !item.read).length > 0 ? true : false}>
@@ -200,23 +212,45 @@ const IndexPage = () => {
                 </Footer>
             </Layout>
         </Layout>
-        <Drawer placement="right" closable={false} visible={visible} onClose={() => setVisible(false)}>
-            {notice?.map((item, k) =>
-                <div className={layout["site-drawer-item"] + " " + (item.__isClose === true ? layout["site-drawer-item-close"] : "")} key={k}>
-                    <Card
-                        title={item.title}
-                        size="small"
-                        extra={<div className={layout["site-drawer-item-extra"]}>
-                            <div className={layout["site-drawer-item-btn"]}>
-                                <CloseOutlined onClick={() => onDrawItemCloseClick(item)} />
-                            </div>
-                        </div>} >
-                        {
-                            item.content
-                        }
-                    </Card>
+        <Drawer placement="right" closable={false} visible={visible} onClose={() => setVisible(false)} >
+            <div className={layout["site-drawer"]}>
+                <div className={"site-drawer-notice"}>
+                    {notice?.map((item, k) =>
+                        <div className={layout["site-drawer-notice-item"] + " " + (item.__isClose === true ? layout["site-drawer-item-close"] : "")} key={k}>
+                            <Card
+                                title={item.title}
+                                size="small"
+                                extra={<div className={layout["site-drawer-notice-item-extra"]}>
+                                    <div className={layout["site-drawer-notice-item-btn"]}>
+                                        <CloseOutlined onClick={() => onDrawItemCloseClick(item)} />
+                                    </div>
+                                </div>} >
+                                {
+                                    item.content
+                                }
+                            </Card>
+                        </div>
+                    )}
                 </div>
-            )}
+                <div className={layout["site-drawer-settings"]}>
+                    <Switch
+                        checkedChildren="日间"
+                        unCheckedChildren="夜间"
+                        defaultChecked
+                        onChange={
+                            (checked) => {
+                                console.log(11)
+                                let body = document.getElementsByTagName("body")[0];
+                                if (checked) {
+                                    body.className = "light-theme";
+                                } else {
+                                    body.className = "dark-theme";
+                                }
+                            }
+                        }
+                    />
+                </div>
+            </div>
         </Drawer>
     </>
 }
