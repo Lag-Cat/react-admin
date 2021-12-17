@@ -1,8 +1,9 @@
-import { Button, Row, Table, Form, Checkbox, Input, message, Col, Modal, Space } from 'antd'
+import { Button, Row, Form, Checkbox, Input, message, Col, Modal, Space } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { findAll, findById, addUser, updateUser, deleteUser } from '../../../api/user'
+import { findAll, findById, addUser, updateUser, deleteUser, selectPage } from '../../../api/user'
 import { debounce } from '../../../utils/optimize'
+import { CommLayout, Panel, Table } from '../../../component'
 interface dataRow extends UserInfo {
     key: string,
     // id: number,
@@ -19,10 +20,13 @@ declare type dataSource = dataRow[]
 
 
 // const { Column } = Table;
+const DEFAULT_SIZE = 10;
+const DEFAULT_CURRENT = 0;
 const { confirm } = Modal;
 const UserPage = () => {
     const [dataSource, setDataSource] = useState<dataSource>();
     const pageHeight = useRef<HTMLDivElement>(null);
+    const searchPanel = useRef<HTMLDivElement>(null);
     const [tableHeight, setTableHeight] = useState<number>(300);
     const columns: column[] = [
         {
@@ -74,7 +78,7 @@ const UserPage = () => {
                             onOk() {
                                 deleteUser({ id: record.id }).then(() => {
                                     message.success("删除成功")
-                                    getData();
+                                    getData(0, 0);
                                 })
                             }
                         })
@@ -83,94 +87,111 @@ const UserPage = () => {
                 </Button>
         },
     ]
-    const getData = () => {
-        findAll().then(res => {
-            const resp = res.map((item, key) => { let r = (item as dataRow); r.key = key.toString(); return r; })
+    const [total, setTotal] = useState(0);
+    const [current, setCurrent] = useState(DEFAULT_CURRENT);
+    const [pageSize, setPageSize] = useState(DEFAULT_SIZE);
+    const getData = (page: number, pageSize: number) => {
+        // findAll().then(res => {
+        //     const resp = res.map((item, key) => { let r = (item as dataRow); r.key = key.toString(); return r; })
+        //     setDataSource(resp);
+        // })
+        selectPage(page, pageSize).then(res => {
+            console.log(res);
+            const resp = res.records.map((item, key) => { let r = (item as dataRow); r.key = key.toString(); return r; })
+            setTotal(res.total);
+            setCurrent(res.current);
             setDataSource(resp);
         })
-
     }
 
-    let getTableHeight = (reducer: number, minHeight?: number) => {
-        minHeight = minHeight ? minHeight : 300;
-        let ph = pageHeight.current?.parentElement?.clientHeight ? pageHeight.current?.parentElement?.clientHeight : minHeight;
-        if (ph < minHeight) ph = minHeight;
-        return ph - reducer;
+    let onResize = () => {
+        console.log(pageHeight.current?.parentElement?.clientHeight)
+        let height = (pageHeight.current?.parentElement?.clientHeight || 0) - (searchPanel.current?.clientHeight || 0) - 24 - 50
+
+        setTableHeight(height);
     }
 
     useEffect(() => {
-        getData();
-        setTableHeight(getTableHeight(240));
-        window.onresize = () => {
-            setTableHeight(getTableHeight(240));
-        }
+        getData(0, 0);
+        onResize();
+        window.addEventListener("resize", onResize)
+
         return () => {
+            window.removeEventListener('resize', onResize)
             if (wrap) {
                 ReactDOM.unmountComponentAtNode(wrap);
             }
         }
     }, [])
 
-    console.log(tableHeight, pageHeight.current?.parentElement?.clientHeight)
-    return <div ref={pageHeight} style={{ padding: "10px" }}>
-        <Row className="m-t-10">
-            <Col span="11">
-                <Row>
-                    <Col span="8">id：</Col>
-                    <Col span="16"><Input /></Col>
-                </Row>
-            </Col>
-            <Col span="11" offset="2">
-                <Row>
-                    <Col span="8">用户名：</Col>
-                    <Col span="16"><Input /></Col>
-                </Row>
-            </Col>
-        </Row>
-        <Row className="m-t-10">
-            <Col span="11">
-                <Row>
-                    <Col span="8">电子邮箱：</Col>
-                    <Col span="16"><Input /></Col>
-                </Row>
-            </Col>
-            <Col span="11" offset="2">
-                <Row>
-                    <Col span="16" offset="8">
-                        <Space>
-                            <Button type="primary" onClick={() => getData()}>查询</Button>
-                            <Button type="primary"
-                                onClick={() => UserModal({ visible: true, operation: "add" }).then(() => getData())}
-                            >
-                                新增
-                            </Button>
-                        </Space>
+    return (
+        <CommLayout style={{ display: "flex", flexDirection: "column" }} ref={pageHeight}>
+            <Panel style={{ flex: 0 }} ref={searchPanel}>
+                <Row className="m-t-10">
+                    <Col span="7">
+                        <Row>
+                            <Col span="8">id：</Col>
+                            <Col span="16"><Input /></Col>
+                        </Row>
+                    </Col>
+                    <Col span="7" offset="1">
+                        <Row>
+                            <Col span="8">用户名：</Col>
+                            <Col span="16"><Input /></Col>
+                        </Row>
+                    </Col>
+                    <Col span="7" offset="1">
+                        <Row>
+                            <Col span="8">电子邮箱：</Col>
+                            <Col span="16"><Input /></Col>
+                        </Row>
                     </Col>
                 </Row>
-            </Col>
-        </Row>
-        <Table
-            columns={columns}
-            dataSource={dataSource}
-            scroll={{ x: 1000, y: tableHeight }}
-
-            onRow={
-                record => {
-                    return {
-                        onDoubleClick: event => {
-                            UserModal({
-                                visible: true,
-                                dataSource: record,
-                                operation: "update"
-                            }).then(() => {
-                                getData();
-                            })
+            </Panel>
+            <Table
+                style={{ flex: 1 }}
+                columns={columns}
+                dataSource={dataSource}
+                scroll={{ x: 1000 }}
+                autoSize
+                height={tableHeight}
+                query add
+                onQuery={() => getData(0, pageSize)}
+                onAdd={() => UserModal({ visible: true, operation: "add" }).then(() => getData(current, pageSize))}
+                pagination={{
+                    total: total,
+                    showQuickJumper: true,
+                    showSizeChanger: true,
+                    showLessItems: true,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} 总共 ${total} 条`,
+                    pageSizeOptions: ["10", "20", "50", "100"],
+                    defaultCurrent: DEFAULT_CURRENT,
+                    defaultPageSize: DEFAULT_SIZE,
+                    current: current,
+                    onChange: (page, pageSize) => {
+                        setPageSize(pageSize || 0);
+                        setCurrent(page);
+                        getData(page, pageSize || 0)
+                    }
+                }}
+                onRow={
+                    record => {
+                        return {
+                            onDoubleClick: event => {
+                                UserModal({
+                                    visible: true,
+                                    dataSource: record,
+                                    operation: "update"
+                                }).then(() => {
+                                    getData(current, pageSize);
+                                })
+                            }
                         }
                     }
-                }
-            } >
-        </Table>
-    </div>
+                } >
+            </Table>
+        </CommLayout >
+    )
 }
 
 declare type operation = "add" | "update"

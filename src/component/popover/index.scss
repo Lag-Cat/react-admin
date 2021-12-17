@@ -1,0 +1,16 @@
+.popover-tooltip {
+  position: absolute;
+  background: #fcfcfc;
+  border: 1px solid rgb(156, 156, 156);
+  border-radius: 4px;
+  padding: 5px;
+  transition: 0.3s all;
+
+  &-show {
+    opacity: 1;
+  }
+
+  &-hide {
+    opacity: 0;
+  }
+}

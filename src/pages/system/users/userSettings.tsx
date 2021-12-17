@@ -5,6 +5,7 @@ import { getCurrentUserInfo, updateUserInfo } from '../../../api/user'
 import { UploadChangeParam } from 'antd/lib/upload';
 import { RcFile, UploadFile } from 'antd/lib/upload/interface';
 import { upload } from '../../../api/files'
+import { ftpUrl } from '../../../utils/config'
 const { Option } = Select;
 const layout = {
     labelCol: { span: 8 },
@@ -75,7 +76,7 @@ const UserSettingPage = () => {
                 <ImgCrop rotate>
                     <Upload
                         listType="picture-card"
-                        action="http://10.2.78.52:46082/ftp/upload"
+                        action={ftpUrl}
                         headers={{
                             Authorization: localStorage.getItem("token") || ""
                         }}

@@ -1,0 +1,40 @@
+.bui-richtexteditor {
+  margin: 10px;
+  background: rgb(255, 255, 255);
+  border-radius: 5px;
+  padding: 5px;
+  border:1px solid rgb(204, 204, 204);
+  &-header {
+    margin: 5px 0;
+    display: flex;
+  }
+  &-content {
+    // outline: none;
+    background: #fff;
+    border-radius: 5px;
+    border: 1px solid rgb(167, 162, 151);
+  }
+
+  &-content:focus {
+    outline: none;
+    border: 2px solid rgb(121, 213, 255);
+    border-radius: 3px;
+  }
+
+  &-icon {
+    // background: #fff;
+    display: inline-block;
+    padding: 3px 3px;
+    line-height: 20px;
+    font-size: 20px !important;
+    transition: 0.5s all;
+    border: 1px solid rgba(255, 255, 255, 0);
+    background: none;
+    &:hover,
+    &-hover {
+      background: #fff;
+      border: 1px solid rgb(167, 162, 151);
+      border-radius: 3px;
+    }
+  }
+}

@@ -76,3 +76,19 @@ export const updateUserInfo = (data: UserInfoM): Promise<void> => {
     );
   });
 };
+export const selectPage = (
+  current: number,
+  pageSize: number,
+  data?: UserInfoM
+): Promise<PaginationResult<UserInfo>> => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`${baseUrl}/api/user/selectPage`, { ...data, current, pageSize })
+      .then(
+        (res) => {
+          resolve(res);
+        },
+        () => reject()
+      );
+  });
+};

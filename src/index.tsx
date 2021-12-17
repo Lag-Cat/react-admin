@@ -6,15 +6,19 @@ import reportWebVitals from './reportWebVitals';
 import 'antd/dist/antd.css';
 import { Provider } from "react-redux"
 import store from './store/index'
+import zhCN from 'antd/es/locale/zh_CN';
+import { ConfigProvider } from 'antd';
 ReactDOM.render(
   // <React.StrictMode>
   //   <Provider store={store}>
   //     <App />
   //   </Provider>
   // </React.StrictMode>,
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <ConfigProvider locale={zhCN}>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </ConfigProvider>,
   document.getElementById('root')
 );
 

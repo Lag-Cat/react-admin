@@ -26,4 +26,12 @@ export default [
       () => import("../../pages/system/users/userSettings")
     ),
   },
+  {
+    name: "apis",
+    path: "/user/apis",
+    title: "api列表查询",
+    component: React.lazy(
+      () => import("../../pages/system/auth/apisPage")
+    ),
+  },
 ];

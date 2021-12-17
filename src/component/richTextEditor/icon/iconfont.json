@@ -1,0 +1,72 @@
+{
+  "id": "2906315",
+  "name": "richTextEditor",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "695182",
+      "name": "日历",
+      "font_class": "rili",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
+      "icon_id": "731513",
+      "name": "图片",
+      "font_class": "tupian",
+      "unicode": "e669",
+      "unicode_decimal": 58985
+    },
+    {
+      "icon_id": "5887779",
+      "name": "超链接",
+      "font_class": "chaolianjie",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "10047318",
+      "name": "文本颜色",
+      "font_class": "ziyuan",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "11734536",
+      "name": "字号,字体,字体大小,字符大小,Word",
+      "font_class": "Word",
+      "unicode": "e66c",
+      "unicode_decimal": 58988
+    },
+    {
+      "icon_id": "11997621",
+      "name": "下划线",
+      "font_class": "xiahuaxian",
+      "unicode": "e6b1",
+      "unicode_decimal": 59057
+    },
+    {
+      "icon_id": "12207894",
+      "name": "颜色",
+      "font_class": "yanse",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "19183182",
+      "name": "12段落",
+      "font_class": "12duanla",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "19183331",
+      "name": "点段落",
+      "font_class": "dianduanla",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    }
+  ]
+}

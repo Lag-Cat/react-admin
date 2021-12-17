@@ -5,6 +5,8 @@ import ReactDOM from 'react-dom'
 import UserLov from '../lov/userLov'
 import SysmenuLov from '../lov/sysmenuLov'
 import { isExists } from '../../../utils/entityUtils'
+import { CommLayout, Panel } from '../../../component'
+
 interface dataRow {
     key: string,
     id: number,
@@ -85,51 +87,55 @@ const AuthPage = () => {
         }
     }, [])
 
-    return <div>
-        <Row>
-            <Col>
-                <Space>
-                    <Button type="primary" onClick={() => getData()}>查询</Button>
-                    <Button type="primary"
-                        onClick={() => UserModal({ visible: true, operation: "add", onFinish: () => { getData() } })}
-                    >
-                        新增
-                    </Button>
-                    <Button
-                        type="primary"
-                        loading={refreshMenuBtnState}
-                        onClick={() => {
-                            setRefreshMenuBtnState(true);
-                            refreshAuthMenu().then(() => {
-                                message.success("刷新成功");
-                                setRefreshMenuBtnState(false);
-                            })
-                        }}
-                    >
-                        刷新菜单
-                    </Button>
-                </Space>
-            </Col>
-        </Row>
-        <Table
-            columns={columns}
-            dataSource={dataSource}
-            onRow={
-                record => {
-                    return {
-                        onDoubleClick: event => {
-                            UserModal({
-                                visible: true,
-                                dataSource: record,
-                                operation: "update",
-                                onFinish: () => { getData() }
-                            })
+    return <CommLayout>
+        <Panel>
+            <Row>
+                <Col>
+                    <Space>
+                        <Button type="primary" onClick={() => getData()}>查询</Button>
+                        <Button type="primary"
+                            onClick={() => UserModal({ visible: true, operation: "add", onFinish: () => { getData() } })}
+                        >
+                            新增
+                        </Button>
+                        <Button
+                            type="primary"
+                            loading={refreshMenuBtnState}
+                            onClick={() => {
+                                setRefreshMenuBtnState(true);
+                                refreshAuthMenu().then(() => {
+                                    message.success("刷新成功");
+                                    setRefreshMenuBtnState(false);
+                                })
+                            }}
+                        >
+                            刷新菜单
+                        </Button>
+                    </Space>
+                </Col>
+            </Row>
+        </Panel>
+        <Panel>
+            <Table
+                columns={columns}
+                dataSource={dataSource}
+                onRow={
+                    record => {
+                        return {
+                            onDoubleClick: event => {
+                                UserModal({
+                                    visible: true,
+                                    dataSource: record,
+                                    operation: "update",
+                                    onFinish: () => { getData() }
+                                })
+                            }
                         }
                     }
-                }
-            } >
-        </Table>
-    </div >
+                } >
+            </Table>
+        </Panel>
+    </CommLayout >
 }
 
 declare type operation = "add" | "update"

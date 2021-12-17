@@ -5,6 +5,7 @@ import chatRouter from "./routes/chat";
 import system from "./routes/system";
 import test from "./routes/test";
 import monitor from "./routes/monitor";
+import example from "./routes/example";
 
 const indexRouter: BRouter.IRouter[] = [
   {
@@ -78,6 +79,7 @@ const routers: BRouter.IRouter[] = [
   ...system,
   ...test,
   ...monitor,
+  ...example,
 ];
 
 export default routers;
