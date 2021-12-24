@@ -4,7 +4,7 @@ import styles from "./index.module.scss";
 // import { login } from '../../../api/system'
 import { useDispatch } from 'react-redux'
 import { router } from '../../../router'
-import { login } from '../lib/system'
+import { login } from '../../index/lib/system'
 const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },

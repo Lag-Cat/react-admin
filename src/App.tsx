@@ -1,6 +1,6 @@
 import './App.css';
 import Router from './router'
-import { setUserInfo, setToken } from './pages/system/lib/system'
+import { setUserInfo, setToken } from './pages/index/lib/system'
 import { ReactNode } from 'react';
 const App = () => {
   let userInfo = localStorage.getItem("userInfo");

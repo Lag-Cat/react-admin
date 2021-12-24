@@ -9,27 +9,23 @@ interface IUserLovProp {
 }
 
 let wrap: HTMLElement = document.createElement("div");
-const UserLov = (props: IUserLovProp) => {
+const userLov = (props?: IUserLovProp) => {
 
   if (!wrap) {
     wrap = document.createElement("div");
-
-   // if (wrap) document.body && document.body.appendChild(wrap);
   }
-  console.log(1);
+
+  let remove = () => {
+    ReactDOM.unmountComponentAtNode(wrap);
+  }
+
   let Cmodal = () => {
-    console.log(2);
-    console.log(wrap)
     let [visible, setVisible] = useState<boolean>(true);
     let [dataSource, setDataSource] = useState<UserInfo[]>();
     let onSearch = () => {
       findAll().then((res) => {
         setDataSource([...res])
       })
-    }
-
-    let onRemove = () => {
-      ReactDOM.unmountComponentAtNode(wrap);
     }
 
     useEffect(() => {
@@ -61,8 +57,8 @@ const UserLov = (props: IUserLovProp) => {
             </Row>
             {
               dataSource?.map((item, key) => <List.Item onDoubleClick={() => {
-                if (props.onSelected) props.onSelected(item);
-                onRemove();
+                if (props?.onSelected) props.onSelected(item);
+                remove();
               }}>
                 <Row style={{ width: "100%" }}>
                   <Col span="2">{item.id}</Col>
@@ -80,8 +76,13 @@ const UserLov = (props: IUserLovProp) => {
       </Modal >
     );
   };
-  console.log(3)
   ReactDOM.render(<Cmodal></Cmodal>, wrap);
+
+  return {
+    distory:()=>{
+      remove();
+    }
+  }
 };
 
-export default UserLov;
+export default userLov;

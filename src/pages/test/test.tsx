@@ -1,6 +1,6 @@
 import { Button, Checkbox, Modal } from "antd"
 import React, { ReactNode } from "react";
-import { addNoticeItem } from '../system/lib/indexPage'
+import { addNoticeItem } from '../index/lib/indexPage'
 import './inedx.scss'
 import { testExcel } from '../../api/test'
 import { Table, CommLayout, Panel, RichTextEditor } from '../../component'

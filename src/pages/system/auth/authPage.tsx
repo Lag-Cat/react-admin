@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { findAll, addRecord, updateRecord, deleteRecord, refreshAuthMenu } from '../../../api/auth'
 import { Button, Row, Col, Space, Table, Modal, Form, Input, Checkbox, Tabs, Card, List, message } from 'antd'
 import ReactDOM from 'react-dom'
-import UserLov from '../lov/userLov'
+import userLov from '../lov/userLov'
 import SysmenuLov from '../lov/sysmenuLov'
 import { isExists } from '../../../utils/entityUtils'
 import { CommLayout, Panel } from '../../../component'
@@ -82,6 +82,7 @@ const AuthPage = () => {
         return () => {
             if (wrap) {
                 ReactDOM.unmountComponentAtNode(wrap);
+                userLov().distory();
                 wrap.remove();
             }
         }
@@ -304,7 +305,7 @@ const UserModal = (props: IUserModalProp) => {
                                 <Space>
                                     <Button
                                         type="link"
-                                        onClick={() => UserLov({
+                                        onClick={() => userLov({
                                             onSelected: (res) => {
                                                 if (userGroup.users.findIndex((item) => item.id === res.id) === -1) {
                                                     setUserGroup({

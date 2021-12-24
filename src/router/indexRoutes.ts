@@ -68,7 +68,7 @@ const indexRouter: BRouter.IRouter[] = [
     name: "index",
     path: "/index",
     title: "主页",
-    component: React.lazy(() => import("../pages/system/indexPage")),
+    component: React.lazy(() => import("../pages/index/indexPage")),
     allowTop: true,
   },
 ];

@@ -19,6 +19,7 @@ import logo from '../../assets/img/logo.png'
 import { loginOut } from './lib/indexPage'
 import { create } from 'domain';
 import './index.scss'
+import { getUrlObject } from '../../utils/urlUtils';
 
 const IconFont = createFromIconfontCN({
     scriptUrl: "//at.alicdn.com/t/font_2654806_z1m63sil87.js"
@@ -65,6 +66,14 @@ const IndexPage = () => {
             setIsMobile(true);
         else
             setIsMobile(false);
+    }
+
+    window.onhashchange = () => {
+        let params = getUrlObject().params;
+        if (params.has("page")) {
+            let page = params.get("page")
+            if (page) setNewTabIfAbsent(page);
+        }
     }
 
     useEffect(() => {
@@ -182,7 +191,7 @@ const IndexPage = () => {
                             } trigger="hover">
                                 <Avatar
                                     size={36}
-                                    src={"http://10.2.78.52:46082/ftp/file/"+userInfo.photo}
+                                    src={"http://10.2.78.52:46082/ftp/file/" + userInfo.photo}
                                 />
 
                             </Popover>

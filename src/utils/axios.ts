@@ -166,7 +166,6 @@ const upload = (url: string, file: File) => {
     };
     let param = new FormData();
     param.append("file", file);
-    console.log(param,"adsakldjalsdjakl")
     instance.post(url, {file:param}).then((response: any) => {
       if (response.code === 0 || response.code === 200) {
         resolve(response.data);

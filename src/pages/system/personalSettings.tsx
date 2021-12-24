@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Button } from 'antd'
-import { MainTabs } from './index'
+import { MainTabs } from '../index'
 const PersonalSettingsPage = () => {
     let [count, setCount] = useState(0)
     return <div>
